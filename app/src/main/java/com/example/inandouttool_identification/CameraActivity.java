@@ -32,6 +32,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        System.out.println("123");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
