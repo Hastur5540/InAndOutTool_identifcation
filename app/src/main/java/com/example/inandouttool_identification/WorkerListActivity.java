@@ -46,7 +46,12 @@ public class WorkerListActivity extends AppCompatActivity {
         }
 
         // 返回按钮点击事件
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v -> {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("workerList", new ArrayList<>(workerList)); // 传回workerList
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        });
 
         // 搜索按钮点击事件
         searchButton.setOnClickListener(v -> performSearch());

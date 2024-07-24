@@ -36,8 +36,10 @@ public class MainActivity extends AppCompatActivity {
         listButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // 启动 WorkerListActivity 并传递工人列表
                 Intent intent = new Intent(MainActivity.this, WorkerListActivity.class);
-                startActivity(intent);
+                intent.putExtra("workerList", new ArrayList<>(workerList));
+                startActivityForResult(intent, 2);
             }
         });
 
@@ -57,11 +59,6 @@ public class MainActivity extends AppCompatActivity {
                     String name = nameInput.getText().toString();
                     String id = idInput.getText().toString();
                     workerList.add(new Worker(name, id, photoPath ,null));
-
-                    // 启动 WorkerListActivity 并传递工人列表
-                    Intent intent = new Intent(MainActivity.this, WorkerListActivity.class);
-                    intent.putExtra("workerList", new ArrayList<>(workerList));
-                    startActivity(intent);
                     Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
                     clearInputs();
                 }
@@ -95,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
             photoPath = data.getStringExtra("photoPath");
             Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
             imageView.setImageBitmap(bitmap);
+        }
+        if (requestCode == 2 && resultCode == RESULT_OK) {
+            workerList = (List<Worker>) data.getSerializableExtra("workerList");
         }
     }
 }
