@@ -5,27 +5,38 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <Button
+        android:id="@+id/listButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="列表"
+        android:layout_gravity="start" />
+
     <EditText
         android:id="@+id/nameInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="输入工人姓名" />
+
     <EditText
         android:id="@+id/idInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="输入工人工号" />
+
     <Button
         android:id="@+id/buttonCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="打开相机" />
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:scaleType="centerCrop"
         android:layout_marginTop="16dp"/>
+
     <View
         android:layout_weight="1"
         android:layout_width="0dp"

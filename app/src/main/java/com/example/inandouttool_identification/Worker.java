@@ -1,51 +1,56 @@
 package com.example.inandouttool_identification;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
 
-public class Worker implements Parcelable {
-    String name;
-    String id; // 工号
-    String photoPath;
+public class Worker implements Serializable {
+    private String name;          // 姓名
+    private String id;            // 工号
+    private String photoPath_IN;  // 进厂照片路径
+    private String photoPath_OUT; // 出厂照片路径
 
-    public Worker(String name, String id, String photoPath) {
+    // 构造函数
+    public Worker(String name, String id, String photoPath_IN, String photoPath_OUT) {
         this.name = name;
         this.id = id;
-        this.photoPath = photoPath;
+        this.photoPath_IN = photoPath_IN;
+        this.photoPath_OUT = photoPath_OUT;
     }
 
-    protected Worker(Parcel in) {
-        name = in.readString();
-        id = in.readString();
-        photoPath = in.readString();
+    // Getter 和 Setter 方法
+    public String getName() {
+        return name;
     }
 
-    public static final Creator<Worker> CREATOR = new Creator<Worker>() {
-        @Override
-        public Worker createFromParcel(Parcel in) {
-            return new Worker(in);
-        }
-
-        @Override
-        public Worker[] newArray(int size) {
-            return new Worker[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeString(id);
-        dest.writeString(photoPath);
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getPhotoPath_IN() {
+        return photoPath_IN;
+    }
+
+    public void setPhotoPath_IN(String photoPath_IN) {
+        this.photoPath_IN = photoPath_IN;
+    }
+
+    public String getPhotoPath_OUT() {
+        return photoPath_OUT;
+    }
+
+    public void setPhotoPath_OUT(String photoPath_OUT) {
+        this.photoPath_OUT = photoPath_OUT;
     }
 
     @Override
     public String toString() {
-        return id + ": " + name; // 用于展示
+        return name + " (工号: " + id + ")";
     }
 }

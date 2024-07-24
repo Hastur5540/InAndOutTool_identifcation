@@ -23,25 +23,26 @@ public class ComparisonActivity extends AppCompatActivity {
         toolsInput = findViewById(R.id.toolsInput);
         compareButton = findViewById(R.id.compareButton);
         captureButton = findViewById(R.id.captureButton);
-
         workerImageView = findViewById(R.id.workerImageView);
-        worker = getIntent().getParcelableExtra("worker");
-
+        worker = (Worker) getIntent().getSerializableExtra("worker"); // Keep using Serializable
+        Button backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v -> finish());
         // 显示工人信息和照片
-        toolsInput.setText(worker.id);
-        // 加载图片到ImageView，这里需要实现图片加载
+        toolsInput.setText(worker.getId()); // 这里可以更改为工具信息
 
+        // Capture button functionality
         captureButton.setOnClickListener(v -> {
             Intent intent = new Intent(ComparisonActivity.this, CameraActivity.class);
             startActivityForResult(intent, 1);
         });
 
+        // Compare button functionality
         compareButton.setOnClickListener(v -> {
-            String currentTools = toolsInput.getText().toString();
-            //if (currentTools.equals(worker.tools)) {
-            if(true){
+            //String currentTools = toolsInput.getText().toString();
+            // 使用 WorkerList 类的静态方法
+            if (true) {
                 Toast.makeText(this, "工具一致", Toast.LENGTH_SHORT).show();
-                WorkerListActivity.workerList.remove(worker);
+                WorkerListActivity.removeWorker(worker); // 使用类名调用静态方法
                 finish();
             } else {
                 Toast.makeText(this, "工具不一致", Toast.LENGTH_SHORT).show();
@@ -53,7 +54,7 @@ public class ComparisonActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            // 获取拍照结果，更新照片
+            // 获取拍照结果，更新照片路径的逻辑
         }
     }
 }

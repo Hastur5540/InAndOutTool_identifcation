@@ -17,7 +17,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private EditText nameInput, idInput;
-    private Button captureButton, submitButton;
+    private Button listButton, captureButton, submitButton;
     private String photoPath = "";
     private List<Worker> workerList = new ArrayList<>();
     private ImageView imageView;
@@ -26,12 +26,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        listButton = findViewById(R.id.listButton);
         nameInput = findViewById(R.id.nameInput);
         idInput = findViewById(R.id.idInput);
         captureButton = findViewById(R.id.buttonCamera);
         submitButton = findViewById(R.id.submitButton);
         imageView = findViewById(R.id.imageView);
+
+        listButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, WorkerListActivity.class);
+                startActivity(intent);
+            }
+        });
 
         captureButton.setOnClickListener(v -> {
             if (validateInputs()) {
@@ -48,11 +56,14 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     String name = nameInput.getText().toString();
                     String id = idInput.getText().toString();
-                    workerList.add(new Worker(name, id, photoPath));
+                    workerList.add(new Worker(name, id, photoPath ,null));
 
-                    // 保存并更新工人列表
-                    WorkerListActivity.updateWorkerList(workerList);
+                    // 启动 WorkerListActivity 并传递工人列表
+                    Intent intent = new Intent(MainActivity.this, WorkerListActivity.class);
+                    intent.putExtra("workerList", new ArrayList<>(workerList));
+                    startActivity(intent);
                     Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
+                    clearInputs();
                 }
             }
         });
@@ -68,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void clearInputs() {
+        nameInput.setText("");
+        idInput.setText("");
+        imageView.setImageDrawable(null); // 清空图片显示
+        photoPath = ""; // 清空照片路径
     }
 
     @Override
