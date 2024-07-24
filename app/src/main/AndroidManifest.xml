@@ -27,6 +27,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".CameraActivity" />
+        <activity android:name=".CameraActivity_OUT" />
         <activity android:name=".ComparisonActivity" />
         <activity android:name=".WorkerListActivity" />
         <provider

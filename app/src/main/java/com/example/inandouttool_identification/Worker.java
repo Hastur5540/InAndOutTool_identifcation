@@ -50,6 +50,19 @@ public class Worker implements Serializable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Worker)) return false;
+        Worker other = (Worker) obj;
+        return this.id.equals(other.id); // 根据唯一字段比较
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode(); // 使用唯一字段生成 hashCode
+    }
+
+    @Override
     public String toString() {
         return name + " (工号: " + id + ")";
     }

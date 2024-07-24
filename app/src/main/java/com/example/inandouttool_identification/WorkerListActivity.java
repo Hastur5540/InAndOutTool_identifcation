@@ -1,9 +1,12 @@
 package com.example.inandouttool_identification;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -85,7 +88,7 @@ public class WorkerListActivity extends AppCompatActivity {
     private void startComparisonActivity(Worker worker) {
         Intent intent = new Intent(WorkerListActivity.this, ComparisonActivity.class);
         intent.putExtra("worker", worker);
-        startActivity(intent);
+        startActivityForResult(intent,1);
     }
 
     // 更新工人列表
@@ -97,8 +100,18 @@ public class WorkerListActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    // 静态方法，用于移除工人
-    public static void removeWorker(Worker worker) {
-        workerList.remove(worker);
+    //移除工人并刷新列表
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            Log.d("WorkerList", "Before removal: " + workerList.toString());
+            Worker worker = (Worker) data.getSerializableExtra("worker");
+            workerList.remove(worker);
+            Log.d("WorkerList", "After removal: " + workerList.toString());
+            adapter.notifyDataSetChanged();
+            Toast.makeText(this, "列表刷新！", Toast.LENGTH_SHORT).show();
+        }
     }
+
 }

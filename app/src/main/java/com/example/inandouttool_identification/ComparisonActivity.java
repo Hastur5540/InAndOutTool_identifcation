@@ -1,6 +1,8 @@
 package com.example.inandouttool_identification;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,7 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 public class ComparisonActivity extends AppCompatActivity {
     private EditText toolsInput;
     private Button compareButton, captureButton;
-    private ImageView workerImageView;
+    private ImageView workerImageView_IN;
+    private ImageView workerImageView_OUT;
     private Worker worker;
 
     @Override
@@ -23,16 +26,21 @@ public class ComparisonActivity extends AppCompatActivity {
         toolsInput = findViewById(R.id.toolsInput);
         compareButton = findViewById(R.id.compareButton);
         captureButton = findViewById(R.id.captureButton);
-        workerImageView = findViewById(R.id.workerImageView);
+        workerImageView_IN = findViewById(R.id.workerImageView_IN);
+        workerImageView_OUT = findViewById(R.id.workerImageView_OUT);
         worker = (Worker) getIntent().getSerializableExtra("worker"); // Keep using Serializable
         Button backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> finish());
-        // 显示工人信息和照片
+        // 显示工人信息和进入时拍的照片
         toolsInput.setText(worker.getId()); // 这里可以更改为工具信息
+        String photoPath = worker.getPhotoPath_IN();
+        Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+        workerImageView_IN.setImageBitmap(bitmap);
 
         // Capture button functionality
         captureButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ComparisonActivity.this, CameraActivity.class);
+            Intent intent = new Intent(ComparisonActivity.this, CameraActivity_OUT.class);
+            intent.putExtra("workerId", worker.getId());
             startActivityForResult(intent, 1);
         });
 
@@ -42,7 +50,9 @@ public class ComparisonActivity extends AppCompatActivity {
             // 使用 WorkerList 类的静态方法
             if (true) {
                 Toast.makeText(this, "工具一致", Toast.LENGTH_SHORT).show();
-                WorkerListActivity.removeWorker(worker); // 使用类名调用静态方法
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("worker", worker);
+                setResult(RESULT_OK, resultIntent);
                 finish();
             } else {
                 Toast.makeText(this, "工具不一致", Toast.LENGTH_SHORT).show();
@@ -54,7 +64,9 @@ public class ComparisonActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            // 获取拍照结果，更新照片路径的逻辑
+            String photoPath_OUT = data.getStringExtra("photoPath");
+            Bitmap bitmap = BitmapFactory.decodeFile(photoPath_OUT);
+            workerImageView_OUT.setImageBitmap(bitmap);
         }
     }
 }
