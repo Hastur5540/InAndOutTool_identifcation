@@ -1,6 +1,8 @@
 package com.example.inandouttool_identification;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
@@ -49,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
             // 保存并更新工人列表
             WorkerListActivity.updateWorkerList(workerList);
             Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, CameraActivity.class);
+            intent.putExtra("workerId", id);
+            startActivity(intent);
         });
     }
 
@@ -57,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             photoPath = data.getStringExtra("photoPath");
-            Uri imageUri = Uri.fromFile(new File(photoPath));
-            imageView.setImageURI(imageUri);
+            Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+            imageView.setImageBitmap(bitmap);
         }
     }
 }
