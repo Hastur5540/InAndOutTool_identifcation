@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,6 +101,18 @@ public class WorkerListActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    private void deletePhoto(String photoPath) {
+        File photoFile = new File(photoPath);
+        if (photoFile.exists()) {
+            boolean deleted = photoFile.delete();
+            if (deleted) {
+                Log.d("WorkerList", "Deleted photo: " + photoPath);
+            } else {
+                Log.d("WorkerList", "Failed to delete photo: " + photoPath);
+            }
+        }
+    }
+
     //移除工人并刷新列表
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -107,10 +120,17 @@ public class WorkerListActivity extends AppCompatActivity {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             Log.d("WorkerList", "Before removal: " + workerList.toString());
             Worker worker = (Worker) data.getSerializableExtra("worker");
+            if (worker != null) {
+                String photoPath_IN = worker.getPhotoPath_IN();
+                String photoPath_OUT = worker.getPhotoPath_OUT();
+                deletePhoto(photoPath_IN);
+                if (photoPath_OUT != null && !photoPath_OUT.isEmpty()) {
+                    deletePhoto(photoPath_OUT);
+                }
+            }
             workerList.remove(worker);
             Log.d("WorkerList", "After removal: " + workerList.toString());
             adapter.notifyDataSetChanged();
-            Toast.makeText(this, "列表刷新！", Toast.LENGTH_SHORT).show();
         }
     }
 

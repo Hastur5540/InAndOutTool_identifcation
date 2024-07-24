@@ -11,12 +11,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+
 public class ComparisonActivity extends AppCompatActivity {
     private EditText toolsInput;
     private Button compareButton, captureButton;
     private ImageView workerImageView_IN;
     private ImageView workerImageView_OUT;
     private Worker worker;
+    String photoPath_OUT = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +36,8 @@ public class ComparisonActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> finish());
         // 显示工人信息和进入时拍的照片
         toolsInput.setText(worker.getId()); // 这里可以更改为工具信息
-        String photoPath = worker.getPhotoPath_IN();
-        Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+        String photoPath_IN = worker.getPhotoPath_IN();
+        Bitmap bitmap = BitmapFactory.decodeFile(photoPath_IN);
         workerImageView_IN.setImageBitmap(bitmap);
 
         // Capture button functionality
@@ -47,15 +50,19 @@ public class ComparisonActivity extends AppCompatActivity {
         // Compare button functionality
         compareButton.setOnClickListener(v -> {
             //String currentTools = toolsInput.getText().toString();
-            // 使用 WorkerList 类的静态方法
-            if (true) {
-                Toast.makeText(this, "工具一致", Toast.LENGTH_SHORT).show();
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("worker", worker);
-                setResult(RESULT_OK, resultIntent);
-                finish();
+            if (photoPath_OUT.isEmpty()) {
+                Toast.makeText(this, "请先拍摄照片", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "工具不一致", Toast.LENGTH_SHORT).show();
+                worker.setPhotoPath_OUT(photoPath_OUT);
+                if (true) {
+                    Toast.makeText(this, "工具一致", Toast.LENGTH_SHORT).show();
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("worker", worker);
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
+                } else {
+                    Toast.makeText(this, "工具不一致", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -64,7 +71,7 @@ public class ComparisonActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            String photoPath_OUT = data.getStringExtra("photoPath");
+            photoPath_OUT = data.getStringExtra("photoPath");
             Bitmap bitmap = BitmapFactory.decodeFile(photoPath_OUT);
             workerImageView_OUT.setImageBitmap(bitmap);
         }
