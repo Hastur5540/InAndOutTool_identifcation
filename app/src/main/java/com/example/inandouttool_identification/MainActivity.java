@@ -3,25 +3,20 @@ package com.example.inandouttool_identification;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private EditText nameInput, idInput, toolsInput;
+    private EditText nameInput, idInput;
     private Button captureButton, submitButton;
     private String photoPath = "";
     private List<Worker> workerList = new ArrayList<>();
@@ -39,22 +34,40 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
 
         captureButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, CameraActivity.class);
-            startActivityForResult(intent, 1);
+            if (validateInputs()) {
+                Intent intent = new Intent(MainActivity.this, CameraActivity.class);
+                intent.putExtra("workerId", idInput.getText().toString());
+                startActivityForResult(intent, 1);
+            }
         });
 
         submitButton.setOnClickListener(v -> {
-            String name = nameInput.getText().toString();
-            String id = idInput.getText().toString();
-            workerList.add(new Worker(name, id, photoPath));
+            if (validateInputs()) {
+                if (photoPath.isEmpty()) {
+                    Toast.makeText(this, "请先拍摄照片", Toast.LENGTH_SHORT).show();
+                } else {
+                    String name = nameInput.getText().toString();
+                    String id = idInput.getText().toString();
+                    workerList.add(new Worker(name, id, photoPath));
 
-            // 保存并更新工人列表
-            WorkerListActivity.updateWorkerList(workerList);
-            Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(MainActivity.this, CameraActivity.class);
-            intent.putExtra("workerId", id);
-            startActivity(intent);
+                    // 保存并更新工人列表
+                    WorkerListActivity.updateWorkerList(workerList);
+                    Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
+    }
+
+    private boolean validateInputs() {
+        if (nameInput.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "请先输入姓名", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (idInput.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "请先输入工号", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     @Override

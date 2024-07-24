@@ -53,7 +53,9 @@ public class WorkerListActivity extends AppCompatActivity {
 
     public static void updateWorkerList(List<Worker> workers) {
         workerList.clear();
-        workerList.addAll(workers);
+        if (workers != null) {
+            workerList.addAll(workers);
+        }
         adapter.notifyDataSetChanged();
     }
 }
