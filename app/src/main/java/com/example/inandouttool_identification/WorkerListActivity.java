@@ -94,6 +94,7 @@ public class WorkerListActivity extends AppCompatActivity {
     private void startComparisonActivity(Worker worker) {
         Intent intent = new Intent(WorkerListActivity.this, ComparisonActivity.class);
         intent.putExtra("worker", worker);
+        intent.putExtra("workerList", new ArrayList<>(workerList));
         startActivityForResult(intent,1);
     }
 

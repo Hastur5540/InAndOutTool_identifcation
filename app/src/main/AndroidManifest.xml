@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,7 +28,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".CameraActivity" />
-        <activity android:name=".CameraActivity_OUT" />
+        <!--activity android:name=".CameraActivity_OUT" /-->
+        <activity android:name=".ToolCheckActivity"/>
         <activity android:name=".ComparisonActivity" />
         <activity android:name=".WorkerListActivity" />
         <provider

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 顶部工具栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <!-- 返回按钮 -->
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="返回" />
+
+        <!-- 占位空间 -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <!-- 工具一致性显示 -->
+        <TextView
+            android:id="@+id/tv_tool_consistency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="工具一致"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- 主容器：左右分栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- 进入携带工具 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_enter_tools"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="进入携带工具："
+                android:textSize="18sp"
+                android:layout_marginTop="16dp" />
+
+            <ListView
+                android:id="@+id/list_enter_tools"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- 离开携带工具 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_exit_tools"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="离开携带工具："
+                android:textSize="18sp"
+                android:layout_marginTop="16dp" />
+
+            <ListView
+                android:id="@+id/list_exit_tools"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
