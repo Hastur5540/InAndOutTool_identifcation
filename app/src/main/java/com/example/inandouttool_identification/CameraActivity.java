@@ -56,7 +56,7 @@ public class CameraActivity extends AppCompatActivity {
     private Bitmap capturedImageTobeCheck;
     private String photoPath;
     private String w_id = null;
-
+    private CameraHelper cameraHelper = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +66,6 @@ public class CameraActivity extends AppCompatActivity {
         cameraPreview = findViewById(R.id.cameraPreview);
         captureButton = findViewById(R.id.captureButton_1);
         backButton = findViewById(R.id.backButton);
-
-//        imageView = findViewById(R.id.imageView);
 
 
         String workerId = getIntent().getStringExtra("workerId");
@@ -80,7 +78,11 @@ public class CameraActivity extends AppCompatActivity {
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                setupCamera();
+                try {
+                    setupCamera();
+                    } catch (CameraAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             @Override
@@ -101,86 +103,54 @@ public class CameraActivity extends AppCompatActivity {
             }
         });
 
-
         captureButton.setOnClickListener(v -> takePicture());
         backButton.setOnClickListener(v -> finish());
-
     }
 
 
-    public void setupCamera() {
-        // 获取相机管理器
-        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        try {
-            // 获取相机ID，这里选择后置摄像头
-            String cameraId = cameraManager.getCameraIdList()[1];
+    public void setupCamera() throws CameraAccessException {
 
-            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);
-            highestResolution = getHighestResolution(characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                    .getOutputSizes(ImageFormat.JPEG));
-
-            // 等比缩放计算
-            ViewGroup.LayoutParams params = cameraPreview.getLayoutParams();
-            float cameraHeight = highestResolution.getWidth();
-            float cameraWidth = highestResolution.getHeight();
+        cameraHelper = new CameraHelper();
+        cameraHelper.adjustCameraPreview(getScreenWidth(this));
 
 
-            float ratio = cameraHeight / cameraWidth;
-            int viewWidth = getScreenWidth(this);
-            int viewHeight = (int)(viewWidth * ratio);
-            params.width = viewWidth;
-            params.height = viewHeight;
-            cameraPreview.setLayoutParams(params);
-
-            // 确保 cameraPreview 垂直居中
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-            cameraPreview.setLayoutParams(layoutParams);
-
-
-
-            // 创建相机捕捉请求
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            cameraManager.openCamera(cameraId, new CameraDevice.StateCallback() {
-                @Override
-                public void onOpened(@NonNull CameraDevice camera) {
-                    // 相机已打开，保存相机设备实例
-                    cameraDevice = camera;
-                    createCameraSession();
-                }
-
-                @Override
-                public void onDisconnected(@NonNull CameraDevice camera) {
-                    // 断开连接时关闭相机
-                    camera.close();
-                    cameraDevice = null;
-                }
-
-                @Override
-                public void onError(@NonNull CameraDevice camera, int error) {
-                    // 发生错误时关闭相机
-                    camera.close();
-                    cameraDevice = null;
-                }
-            }, null); // 使用默认的 Handler
-
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
+        // 创建相机捕捉请求
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            return;
         }
+
+        CameraManager cameraManager = cameraHelper.getCameraManager();
+        cameraManager.openCamera(cameraHelper.getCameraIdFacingBackId(), new CameraDevice.StateCallback() {
+            @Override
+            public void onOpened(@NonNull CameraDevice camera) {
+                // 相机已打开，保存相机设备实例
+                cameraDevice = camera;
+                createCameraSession();
+
+                Toast.makeText(CameraActivity.this, "viewW: " + cameraPreview.getWidth() + ", viewH" + cameraPreview.getHeight(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CameraActivity.this, "cameraW" + cameraHelper.getResolution().getHeight() + ", cameraH: " + cameraHelper.getResolution().getWidth(), Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onDisconnected(@NonNull CameraDevice camera) {
+                // 断开连接时关闭相机
+                camera.close();
+                cameraDevice = null;
+            }
+
+            @Override
+            public void onError(@NonNull CameraDevice camera, int error) {
+                // 发生错误时关闭相机
+                camera.close();
+                cameraDevice = null;
+            }
+        }, null); // 使用默认的 Handler
+
     }
 
 
     private void createCameraSession() {
-
         // 获取 SurfaceHolder 的 Surface, 预览
         SurfaceHolder holder = cameraPreview.getHolder();
         Surface previewSurface = holder.getSurface();
@@ -200,11 +170,7 @@ public class CameraActivity extends AppCompatActivity {
                 matrix.postRotate(calRotateDegree());
 
                 Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-
-
                 Bitmap stretchedBitmap = Bitmap.createScaledBitmap(rotatedBitmap, reader.getWidth(), reader.getHeight(), true);
-
-
 
 
                 View captureFrame = findViewById(R.id.captureFrame);
@@ -223,10 +189,7 @@ public class CameraActivity extends AppCompatActivity {
 
                 Bitmap croppedBitmap = Bitmap.createBitmap(stretchedBitmap, frameX-preFrameX, frameY-preFrameY, frameWidth, frameHeight);
 
-
-//                capturedImageTobeCheck = croppedBitmap;
                 runOnUiThread(() -> toCheckView(croppedBitmap));
-//                saveImage(bytes);
             } finally {
                 if (image != null) {
                     image.close();
@@ -262,8 +225,8 @@ public class CameraActivity extends AppCompatActivity {
         }catch(CameraAccessException e){
             e.printStackTrace();
         }
-
     }
+
 
     private void takePicture(){
         if (cameraDevice == null) return;
@@ -373,16 +336,6 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    private Size getHighestResolution(Size[] outputSizes) {
-        Size maxSize = outputSizes[0];
-        for (Size size : outputSizes) {
-            if (size.getWidth() * size.getHeight() > maxSize.getWidth() * maxSize.getHeight()) {
-                maxSize = size;
-            }
-        }
-        return maxSize;
-    }
-
     private void saveImage(byte[] data) {
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         if (!storageDir.exists() && !storageDir.mkdirs()) {
@@ -401,12 +354,113 @@ public class CameraActivity extends AppCompatActivity {
 
     }
 
+
     public byte[] bitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         // 将 Bitmap 压缩为 PNG 格式，质量为 100（无损压缩）
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         return byteArrayOutputStream.toByteArray();
     }
+
+
+
+    // 初始化相机信息
+    private class CameraHelper {
+
+        private final CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+
+        private String cameraIdFacingBackId;
+
+        private Size resolution;
+
+
+        // 设置摄像头朝向
+        public void setCameraToFaceBack() throws CameraAccessException {
+            String[] cameraIds = cameraManager.getCameraIdList();
+
+            for (String cameraId : cameraIds) {
+                CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);
+                Integer lensFacing = characteristics.get(CameraCharacteristics.LENS_FACING);
+
+                if (lensFacing != null && lensFacing == CameraCharacteristics.LENS_FACING_BACK) {
+                    this.cameraIdFacingBackId = cameraId;
+                    break; // 找到后置摄像头后，停止搜索
+                }
+            }
+
+            if (this.cameraIdFacingBackId == null) {
+                throw new CameraAccessException(CameraAccessException.CAMERA_ERROR, "后置摄像头未找到");
+            }
+        }
+
+
+        private Size getHighestResolution(Size[] outputSizes) {
+            Size maxSize = outputSizes[0];
+            for (Size size : outputSizes) {
+                if (size.getWidth() * size.getHeight() > maxSize.getWidth() * maxSize.getHeight()) {
+                    maxSize = size;
+                }
+            }
+            return maxSize;
+        }
+
+
+        // 获取摄像头的分辨率
+        public void setCameraResolution() throws CameraAccessException {
+            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(this.cameraIdFacingBackId);
+
+            this.resolution = getHighestResolution(characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                    .getOutputSizes(ImageFormat.JPEG));
+        }
+
+
+        public void adjustCameraPreview(int screenWidth){
+            int width = resolution.getHeight();
+
+            int height = resolution.getWidth();
+
+            float radio = (float)height/width;
+
+            int viewHeight = (int)(screenWidth * radio);
+
+
+            // 确保 cameraPreview 垂直居中
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+            cameraPreview.setLayoutParams(layoutParams);
+
+
+            // 确保设置正确的 LayoutParams 类型
+            ViewGroup.LayoutParams params =(RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
+            params.width = screenWidth;
+            params.height = viewHeight;
+            cameraPreview.setLayoutParams(params);
+
+        }
+
+
+
+
+        // 初始化相机信息
+        public CameraHelper() throws CameraAccessException {
+            // 设置摄像头为后置摄像头
+            setCameraToFaceBack();
+
+            // 获取摄像设备的分辨率
+            setCameraResolution();
+
+        }
+
+        public Size getResolution() {
+            return resolution;
+        }
+
+        public String getCameraIdFacingBackId(){
+            return this.cameraIdFacingBackId;
+        }
+
+        public CameraManager getCameraManager(){
+            return this.cameraManager;
+        }
+    }
 }
-
-
