@@ -42,8 +42,9 @@ public class ComparisonActivity extends AppCompatActivity {
 
         // Capture button functionality
         captureButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ComparisonActivity.this, CameraActivity_OUT.class);
+            Intent intent = new Intent(ComparisonActivity.this, CameraActivity.class);
             intent.putExtra("workerId", worker.getId());
+            intent.putExtra("inOutFlag", "out");
             startActivityForResult(intent, 1);
         });
 

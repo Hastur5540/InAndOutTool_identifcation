@@ -3,19 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Camera preview SurfaceView -->
     <SurfaceView
         android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_alignParentTop="true"
+    <!-- Green capture frame with transparent center -->
+    <View
+        android:id="@+id/captureFrame"
+        android:layout_width="324dp"
+        android:layout_height="294dp"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
-        android:scaleType="centerCrop" />
+        android:background="@drawable/border_frame" />
 
+
+    <!-- Capture photo button -->
     <Button
         android:id="@+id/captureButton_1"
         android:layout_width="wrap_content"
@@ -25,6 +34,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp" />
 
+    <!-- Back button -->
     <Button
         android:id="@+id/backButton"
         android:layout_width="wrap_content"
@@ -33,4 +43,10 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_margin="16dp" />
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/imageView"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:layout_alignParentTop="true" />-->
 </RelativeLayout>
