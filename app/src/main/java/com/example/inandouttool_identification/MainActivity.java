@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     String name = nameInput.getText().toString();
                     String id = idInput.getText().toString();
                     workerList.add(new Worker(name, id, photoPath ,null));
-                    Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, " 工人信息已保存！", Toast.LENGTH_SHORT).show();
                     clearInputs();
                 }
             }
