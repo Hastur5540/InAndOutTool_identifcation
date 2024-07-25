@@ -107,17 +107,22 @@ public class CameraActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> finish());
     }
 
-
     public void setupCamera() throws CameraAccessException {
 
         cameraHelper = new CameraHelper();
-//        cameraHelper.adjustCameraPreview(getScreenWidth(this));
+        cameraHelper.adjustCameraPreview(getScreenWidth(this));
 
 
-        // 创建相机捕捉请求
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            return;
+        // 权限校验以及控制
+        boolean banCapturing = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED;
+
+        if (banCapturing) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
         }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            finish();
+        }
+
 
         CameraManager cameraManager = cameraHelper.getCameraManager();
         cameraManager.openCamera(cameraHelper.getCameraIdFacingBackId(), new CameraDevice.StateCallback() {
@@ -154,9 +159,9 @@ public class CameraActivity extends AppCompatActivity {
         // 获取 SurfaceHolder 的 Surface, 预览
         SurfaceHolder holder = cameraPreview.getHolder();
         Surface previewSurface = holder.getSurface();
+
         holder.setSizeFromLayout();
         // 创建ImageReader， 拍照
-
         imageReader = ImageReader.newInstance(cameraPreview.getWidth(), cameraPreview.getHeight(), ImageFormat.JPEG, 1);
         imageReader.setOnImageAvailableListener(reader -> {
             Image image = null;
@@ -362,7 +367,6 @@ public class CameraActivity extends AppCompatActivity {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         return byteArrayOutputStream.toByteArray();
     }
-
 
 
     // 初始化相机信息
