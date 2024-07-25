@@ -87,7 +87,7 @@ public class CameraActivity extends AppCompatActivity {
 
             @Override
             public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-                // No action needed
+                // 更改该surface的layout
             }
 
             @Override
@@ -111,7 +111,7 @@ public class CameraActivity extends AppCompatActivity {
     public void setupCamera() throws CameraAccessException {
 
         cameraHelper = new CameraHelper();
-        cameraHelper.adjustCameraPreview(getScreenWidth(this));
+//        cameraHelper.adjustCameraPreview(getScreenWidth(this));
 
 
         // 创建相机捕捉请求
@@ -154,8 +154,9 @@ public class CameraActivity extends AppCompatActivity {
         // 获取 SurfaceHolder 的 Surface, 预览
         SurfaceHolder holder = cameraPreview.getHolder();
         Surface previewSurface = holder.getSurface();
-
+        holder.setSizeFromLayout();
         // 创建ImageReader， 拍照
+
         imageReader = ImageReader.newInstance(cameraPreview.getWidth(), cameraPreview.getHeight(), ImageFormat.JPEG, 1);
         imageReader.setOnImageAvailableListener(reader -> {
             Image image = null;
