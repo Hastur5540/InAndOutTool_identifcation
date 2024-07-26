@@ -6,7 +6,7 @@
     <!-- Camera preview SurfaceView -->
     <SurfaceView
         android:id="@+id/cameraPreview"
-        android:layout_width="420dp"
+        android:layout_width="100dp"
         android:layout_height="560dp" />
 
 

@@ -1,5 +1,6 @@
 package com.example.inandouttool_identification;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Environment;
 import android.widget.RelativeLayout;
 import android.Manifest;
@@ -113,6 +114,7 @@ public class CameraActivity extends AppCompatActivity {
         cameraHelper.adjustCameraPreview(getScreenWidth(this));
 
 
+
         // 权限校验以及控制
         boolean banCapturing = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED;
 
@@ -217,16 +219,9 @@ public class CameraActivity extends AppCompatActivity {
                         previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
                         previewRequestBuilder.addTarget(previewSurface);
 
-
                         Rect sensorArraySize = cameraHelper.getCameraManager().getCameraCharacteristics(cameraHelper.getCameraIdFacingBackId()).get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-                        System.out.println(sensorArraySize);
                         previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, sensorArraySize);
                         Toast.makeText(CameraActivity.this, sensorArraySize.toString(), Toast.LENGTH_SHORT).show();
-
-                        previewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-                        previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                        previewRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
-                        previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
 
 
                         captureSession.setRepeatingRequest(previewRequestBuilder.build(), null, null);
@@ -450,11 +445,13 @@ public class CameraActivity extends AppCompatActivity {
 
 
             // 确保设置正确的 LayoutParams 类型
-//            ViewGroup.LayoutParams params =(RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
-//            params.width = screenWidth;
-//            params.height = viewHeight;
-//
-//            cameraPreview.setLayoutParams(params);
+            ViewGroup.LayoutParams params =(RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
+            params.width = screenWidth;
+            params.height = viewHeight;
+
+            cameraPreview.setLayoutParams(params);
+
+            cameraPreview.requestLayout();
 
         }
 
