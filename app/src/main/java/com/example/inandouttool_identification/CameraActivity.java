@@ -223,6 +223,11 @@ public class CameraActivity extends AppCompatActivity {
                         previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, sensorArraySize);
                         Toast.makeText(CameraActivity.this, sensorArraySize.toString(), Toast.LENGTH_SHORT).show();
 
+                        previewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+                        previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                        previewRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
+                        previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+
 
                         captureSession.setRepeatingRequest(previewRequestBuilder.build(), null, null);
                     }catch(CameraAccessException e){
@@ -445,11 +450,11 @@ public class CameraActivity extends AppCompatActivity {
 
 
             // 确保设置正确的 LayoutParams 类型
-            ViewGroup.LayoutParams params =(RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
-            params.width = screenWidth;
-            params.height = viewHeight;
-
-            cameraPreview.setLayoutParams(params);
+//            ViewGroup.LayoutParams params =(RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
+//            params.width = screenWidth;
+//            params.height = viewHeight;
+//
+//            cameraPreview.setLayoutParams(params);
 
         }
 
