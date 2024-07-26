@@ -132,7 +132,6 @@ public class CameraActivity extends AppCompatActivity {
                 cameraDevice = camera;
                 createCameraSession();
 
-                Toast.makeText(CameraActivity.this, String.valueOf(getCameraSensorOrientation()), Toast.LENGTH_SHORT).show();
 
 //                Toast.makeText(CameraActivity.this, "viewW: " + cameraPreview.getWidth() + ", viewH" + cameraPreview.getHeight(), Toast.LENGTH_SHORT).show();
 //                Toast.makeText(CameraActivity.this, "cameraW" + cameraHelper.getResolution().getHeight() + ", cameraH: " + cameraHelper.getResolution().getWidth(), Toast.LENGTH_SHORT).show();
@@ -422,9 +421,9 @@ public class CameraActivity extends AppCompatActivity {
 
 
         public void adjustCameraPreview(int screenWidth){
-            int width = resolution.getWidth();
+            int width = resolution.getHeight();
 
-            int height = resolution.getHeight();
+            int height = resolution.getWidth();
 
             float radio = (float)height/width;
 
