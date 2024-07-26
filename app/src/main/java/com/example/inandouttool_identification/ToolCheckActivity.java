@@ -3,15 +3,20 @@ package com.example.inandouttool_identification;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ToolCheckActivity extends AppCompatActivity {
 
@@ -31,7 +36,6 @@ public class ToolCheckActivity extends AppCompatActivity {
         listExitTools = findViewById(R.id.list_exit_tools);
         tvToolConsistency = findViewById(R.id.tv_tool_consistency);
 
-        // 设置返回按钮的点击事件
         btnBack.setOnClickListener(v -> {
             Intent resultIntent = new Intent();
             resultIntent.putExtra("Consistent_flags", Consistent_flags);
@@ -39,38 +43,100 @@ public class ToolCheckActivity extends AppCompatActivity {
             finish();
         });
 
-        // 获取 Bundle 并填充数据
-        Bundle bundle = getIntent().getBundleExtra("tools");
+        Bundle bundle_IN = getIntent().getBundleExtra("tools_IN");
+        Bundle bundle_OUT = getIntent().getBundleExtra("tools_OUT");
 
-        if (bundle != null) {
+        Log.d("ToolCheckActivity", "Bundle IN: " + bundle_IN);
+        Log.d("ToolCheckActivity", "Bundle OUT: " + bundle_OUT);
+
+        if (bundle_IN != null && bundle_OUT != null) {
+            Map<String, Integer> enterToolsMap = new HashMap<>();
+            Map<String, Integer> exitToolsMap = new HashMap<>();
+
+            // Extracting tools
+            for (String key : bundle_IN.keySet()) {
+                int quantity = bundle_IN.getInt(key);
+                enterToolsMap.put(key, quantity);
+            }
+
+            for (String key : bundle_OUT.keySet()) {
+                int quantity = bundle_OUT.getInt(key);
+                exitToolsMap.put(key, quantity);
+            }
+
             List<String> enterToolsList = new ArrayList<>();
             List<String> exitToolsList = new ArrayList<>();
 
-            // 提取进入和离开的工具数据
-            for (String key : bundle.keySet()) {
-                int quantity = bundle.getInt(key);
-                enterToolsList.add(key + " x" + quantity);
-                exitToolsList.add(key + " x" + quantity);//假数据
+            // Prepare lists
+            for (Map.Entry<String, Integer> entry : enterToolsMap.entrySet()) {
+                enterToolsList.add(entry.getKey() + " x" + entry.getValue());
             }
 
-            // 使用 ArrayAdapter 填充 ListView
-            ArrayAdapter<String> enterAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, enterToolsList);
-            listEnterTools.setAdapter(enterAdapter);
+            for (Map.Entry<String, Integer> entry : exitToolsMap.entrySet()) {
+                exitToolsList.add(entry.getKey() + " x" + entry.getValue());
+            }
 
-            // 工具显示在离开工具列表中
-            ArrayAdapter<String> exitAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, exitToolsList);
-            listExitTools.setAdapter(exitAdapter);
+            // Set adapters
+            listEnterTools.setAdapter(new ToolAdapter(enterToolsList, exitToolsMap));
+            listExitTools.setAdapter(new ToolAdapter(exitToolsList, enterToolsMap));
 
-            // 检查工具一致性逻辑
-            if (enterToolsList.equals(exitToolsList)) {
-                tvToolConsistency.setText("工具一致");
-                tvToolConsistency.setTextColor(Color.GREEN); // 设置为绿色
-                Consistent_flags = true;
+            // Consistency check
+            Consistent_flags = enterToolsMap.equals(exitToolsMap);
+            tvToolConsistency.setText(Consistent_flags ? "工具一致" : "工具不一致");
+            tvToolConsistency.setTextColor(Consistent_flags ? Color.GREEN : Color.RED);
+        }
+    }
+
+    private static class ToolAdapter extends BaseAdapter {
+        private final List<String> toolsList;
+        private final Map<String, Integer> compareMap;
+
+        ToolAdapter(List<String> toolsList, Map<String, Integer> compareMap) {
+            this.toolsList = toolsList;
+            this.compareMap = compareMap;
+        }
+
+        @Override
+        public int getCount() {
+            return toolsList.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return toolsList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView textView;
+            if (convertView == null) {
+                textView = new TextView(parent.getContext());
+                textView.setPadding(16, 16, 16, 16);
             } else {
-                tvToolConsistency.setText("工具不一致");
-                tvToolConsistency.setTextColor(Color.RED); // 设置为红色
-                Consistent_flags = false;
+                textView = (TextView) convertView;
             }
+            textView.setText(toolsList.get(position));
+
+            String toolName = toolsList.get(position).split(" x")[0];
+            int toolCount = Integer.parseInt(toolsList.get(position).split(" x")[1]);
+
+            // Highlighting logic
+            if (compareMap.containsKey(toolName)) {
+                if (compareMap.get(toolName) != toolCount) {
+                    textView.setBackgroundColor(Color.YELLOW); // Highlight inconsistent tools
+                } else {
+                    textView.setBackgroundColor(Color.TRANSPARENT); // Default background
+                }
+            } else {
+                textView.setBackgroundColor(Color.TRANSPARENT); // Default background
+            }
+
+            return textView;
         }
     }
 }

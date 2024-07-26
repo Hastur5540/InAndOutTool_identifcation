@@ -44,7 +44,6 @@ public class CameraActivity extends AppCompatActivity {
     private SurfaceView cameraPreview;
     private CameraDevice cameraDevice;
     private static final int REQUEST_CAMERA_PERMISSION = 200;
-
     private CameraCaptureSession cameraCaptureSession;
     private CaptureRequest.Builder captureRequestBuilder;
     private ImageReader imageReader;

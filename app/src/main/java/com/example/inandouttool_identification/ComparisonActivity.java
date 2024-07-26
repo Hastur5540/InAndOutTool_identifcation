@@ -80,23 +80,40 @@ public class ComparisonActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     //后端返回的数据
-                    Bundle bundle = new Bundle();
-                    bundle.putInt("卡簧", 5);
-                    bundle.putInt("一字螺丝刀", 3);
-                    bundle.putInt("斜口钳", 7);
-                    bundle.putInt("插排", 2);
-                    bundle.putInt("锉刀", 4);
-                    bundle.putInt("橡皮锤", 6);
-                    bundle.putInt("活动扳手", 1);
-                    bundle.putInt("记号笔", 8);
-                    bundle.putInt("多功能万用剪刀", 9);
+                    Bundle bundle_IN = new Bundle();
+                    bundle_IN.putInt("卡簧", 5);
+                    bundle_IN.putInt("一字螺丝刀", 3);
+                    bundle_IN.putInt("斜口钳", 7);
+                    bundle_IN.putInt("插排", 2);
+                    bundle_IN.putInt("锉刀", 4);
+                    bundle_IN.putInt("橡皮锤", 6);
+                    bundle_IN.putInt("活动扳手", 1);
+                    bundle_IN.putInt("记号笔", 8);
+                    bundle_IN.putInt("多功能万用剪刀", 9);
+
+                    Bundle bundle_OUT = new Bundle();
+                    bundle_OUT.putInt("卡簧", 5);
+                    bundle_OUT.putInt("一字螺丝刀", 3);
+                    bundle_OUT.putInt("斜口钳", 6);
+                    bundle_OUT.putInt("插排", 2);
+                    bundle_OUT.putInt("锉刀", 4);
+                    bundle_OUT.putInt("橡皮锤", 6);
+                    bundle_OUT.putInt("活动扳手", 1);
+                    bundle_OUT.putInt("记号笔", 8);
+                    bundle_OUT.putInt("多功能万用剪刀", 8);
 
                     // 处理结束后，更新UI
                     runOnUiThread(() -> {
                         hideLoading();
                         // 准备跳转到新页面
                         Intent intent = new Intent(ComparisonActivity.this, ToolCheckActivity.class);
-                        intent.putExtra("tools", bundle);
+                        if(worker.getId().equals("000")){
+                            intent.putExtra("tools_IN", bundle_IN);
+                            intent.putExtra("tools_OUT", bundle_OUT);
+                        }else{
+                            intent.putExtra("tools_IN", bundle_IN);
+                            intent.putExtra("tools_OUT", bundle_IN);
+                        }
                         startActivityForResult(intent, 2);
                         // 这里处理工具比较的逻辑
 //                        boolean toolsMatch = true; // 这应为您的实际比较结果
