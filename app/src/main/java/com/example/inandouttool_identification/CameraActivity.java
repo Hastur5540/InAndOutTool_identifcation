@@ -133,8 +133,8 @@ public class CameraActivity extends AppCompatActivity {
                 createCameraSession();
 
 
-//                Toast.makeText(CameraActivity.this, "viewW: " + cameraPreview.getWidth() + ", viewH" + cameraPreview.getHeight(), Toast.LENGTH_SHORT).show();
-//                Toast.makeText(CameraActivity.this, "cameraW" + cameraHelper.getResolution().getHeight() + ", cameraH: " + cameraHelper.getResolution().getWidth(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CameraActivity.this, "viewW: " + cameraPreview.getWidth() + ", viewH" + cameraPreview.getHeight(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CameraActivity.this, "cameraW" + cameraHelper.getResolution().getHeight() + ", cameraH: " + cameraHelper.getResolution().getWidth(), Toast.LENGTH_SHORT).show();
 
             }
 
@@ -161,7 +161,7 @@ public class CameraActivity extends AppCompatActivity {
         SurfaceHolder holder = cameraPreview.getHolder();
         Surface previewSurface = holder.getSurface();
 
-        holder.setSizeFromLayout();
+//        holder.setSizeFromLayout();
         // 创建ImageReader， 拍照
         imageReader = ImageReader.newInstance(cameraPreview.getWidth(), cameraPreview.getHeight(), ImageFormat.JPEG, 1);
         imageReader.setOnImageAvailableListener(reader -> {
@@ -403,6 +403,7 @@ public class CameraActivity extends AppCompatActivity {
         private Size getHighestResolution(Size[] outputSizes) {
             Size maxSize = outputSizes[0];
             for (Size size : outputSizes) {
+                System.out.println(size.toString());
                 if (size.getWidth() * size.getHeight() > maxSize.getWidth() * maxSize.getHeight()) {
                     maxSize = size;
                 }
@@ -440,6 +441,8 @@ public class CameraActivity extends AppCompatActivity {
             ViewGroup.LayoutParams params =(RelativeLayout.LayoutParams) cameraPreview.getLayoutParams();
             params.width = screenWidth;
             params.height = viewHeight;
+
+//            params.height = height;
             cameraPreview.setLayoutParams(params);
 
         }
