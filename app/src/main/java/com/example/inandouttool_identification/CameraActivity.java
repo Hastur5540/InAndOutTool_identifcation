@@ -1,4 +1,5 @@
 package com.example.inandouttool_identification;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.widget.RelativeLayout;
 import android.Manifest;
@@ -132,8 +133,8 @@ public class CameraActivity extends AppCompatActivity {
                 createCameraSession();
 
 
-                Toast.makeText(CameraActivity.this, "viewW: " + cameraPreview.getWidth() + ", viewH" + cameraPreview.getHeight(), Toast.LENGTH_SHORT).show();
-                Toast.makeText(CameraActivity.this, "cameraW" + cameraHelper.getResolution().getHeight() + ", cameraH: " + cameraHelper.getResolution().getWidth(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(CameraActivity.this, "viewW: " + cameraPreview.getWidth() + ", viewH" + cameraPreview.getHeight(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(CameraActivity.this, "cameraW" + cameraHelper.getResolution().getHeight() + ", cameraH: " + cameraHelper.getResolution().getWidth(), Toast.LENGTH_SHORT).show();
 
             }
 
@@ -215,6 +216,13 @@ public class CameraActivity extends AppCompatActivity {
                     try {
                         previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
                         previewRequestBuilder.addTarget(previewSurface);
+
+
+                        Rect sensorArraySize = cameraHelper.getCameraManager().getCameraCharacteristics(cameraHelper.getCameraIdFacingBackId()).get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+                        System.out.println(sensorArraySize);
+                        previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, sensorArraySize);
+                        Toast.makeText(CameraActivity.this, sensorArraySize.toString(), Toast.LENGTH_SHORT).show();
+
 
                         captureSession.setRepeatingRequest(previewRequestBuilder.build(), null, null);
                     }catch(CameraAccessException e){
@@ -441,7 +449,6 @@ public class CameraActivity extends AppCompatActivity {
             params.width = screenWidth;
             params.height = viewHeight;
 
-//            params.height = height;
             cameraPreview.setLayoutParams(params);
 
         }
