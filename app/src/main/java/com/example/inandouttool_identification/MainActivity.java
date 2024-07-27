@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
             if (validateInputs()) {
                 Intent intent = new Intent(MainActivity.this, CameraActivity.class);
                 intent.putExtra("workerId", idInput.getText().toString());
+                intent.putExtra("inOutFlag", "in");
                 startActivityForResult(intent, 1);
             }
         });
