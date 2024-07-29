@@ -4,13 +4,15 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -24,7 +26,9 @@ public class ToolCheckActivity extends AppCompatActivity {
     private ListView listEnterTools;
     private ListView listExitTools;
     private TextView tvToolConsistency;
-    Boolean Consistent_flags = false;
+    private ImageView workerImageView_IN;
+    private ImageView workerImageView_OUT;
+    private Boolean Consistent_flags = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +38,8 @@ public class ToolCheckActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         listEnterTools = findViewById(R.id.list_enter_tools);
         listExitTools = findViewById(R.id.list_exit_tools);
+        workerImageView_IN = findViewById(R.id.img_enter_tools);
+        workerImageView_OUT = findViewById(R.id.img_exit_tools);
         tvToolConsistency = findViewById(R.id.tv_tool_consistency);
 
         btnBack.setOnClickListener(v -> {
@@ -53,7 +59,7 @@ public class ToolCheckActivity extends AppCompatActivity {
             Map<String, Integer> enterToolsMap = new HashMap<>();
             Map<String, Integer> exitToolsMap = new HashMap<>();
 
-            // Extracting tools
+            // 提取工具
             for (String key : bundle_IN.keySet()) {
                 int quantity = bundle_IN.getInt(key);
                 enterToolsMap.put(key, quantity);
@@ -67,7 +73,7 @@ public class ToolCheckActivity extends AppCompatActivity {
             List<String> enterToolsList = new ArrayList<>();
             List<String> exitToolsList = new ArrayList<>();
 
-            // Prepare lists
+            // 准备工具列表
             for (Map.Entry<String, Integer> entry : enterToolsMap.entrySet()) {
                 enterToolsList.add(entry.getKey() + " x" + entry.getValue());
             }
@@ -76,15 +82,59 @@ public class ToolCheckActivity extends AppCompatActivity {
                 exitToolsList.add(entry.getKey() + " x" + entry.getValue());
             }
 
-            // Set adapters
+            // 设置适配器
             listEnterTools.setAdapter(new ToolAdapter(enterToolsList, exitToolsMap));
             listExitTools.setAdapter(new ToolAdapter(exitToolsList, enterToolsMap));
 
-            // Consistency check
+            // 一致性检查
             Consistent_flags = enterToolsMap.equals(exitToolsMap);
             tvToolConsistency.setText(Consistent_flags ? "工具一致" : "工具不一致");
             tvToolConsistency.setTextColor(Consistent_flags ? Color.GREEN : Color.RED);
+            if (Consistent_flags) {
+                workerImageView_IN.setImageResource(R.drawable.ic_enter_tool);
+                workerImageView_OUT.setImageResource(R.drawable.ic_enter_tool);
+            } else {
+                workerImageView_IN.setImageResource(R.drawable.ic_enter_tool);
+                workerImageView_OUT.setImageResource(R.drawable.ic_exit_tool);
+
+                // 点击一致性文本查看不一致情况
+                tvToolConsistency.setOnClickListener(v -> showDiscrepancyDialog(enterToolsMap, exitToolsMap));
+            }
         }
+    }
+
+    private void showDiscrepancyDialog(Map<String, Integer> enterToolsMap, Map<String, Integer> exitToolsMap) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("工具不一致");
+
+        // 计算不一致工具
+        StringBuilder discrepancy = new StringBuilder("以下工具不一致：\n");
+
+        // 查找多出来的工具
+        for (Map.Entry<String, Integer> entry : exitToolsMap.entrySet()) {
+            String toolName = entry.getKey();
+            int exitCount = entry.getValue();
+            int enterCount = enterToolsMap.getOrDefault(toolName, 0);
+            if (exitCount > enterCount) {
+                discrepancy.append(toolName).append("多了").append(exitCount - enterCount).append("个\n");
+            }
+        }
+
+        // 查找少了的工具
+        for (Map.Entry<String, Integer> entry : enterToolsMap.entrySet()) {
+            String toolName = entry.getKey();
+            int enterCount = entry.getValue();
+            int exitCount = exitToolsMap.getOrDefault(toolName, 0);
+            if (enterCount > exitCount) {
+                discrepancy.append(toolName).append("少了").append(enterCount - exitCount).append("个\n");
+            }
+        }
+
+        builder.setMessage(discrepancy.toString());
+        builder.setPositiveButton("确认", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private static class ToolAdapter extends BaseAdapter {
@@ -113,30 +163,39 @@ public class ToolCheckActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextView textView;
+            ViewHolder holder;
+
             if (convertView == null) {
-                textView = new TextView(parent.getContext());
-                textView.setPadding(16, 16, 16, 16);
+                convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
+                holder = new ViewHolder();
+                holder.textView = convertView.findViewById(R.id.text_item);
+                convertView.setTag(holder);
             } else {
-                textView = (TextView) convertView;
+                holder = (ViewHolder) convertView.getTag();
             }
-            textView.setText(toolsList.get(position));
 
-            String toolName = toolsList.get(position).split(" x")[0];
-            int toolCount = Integer.parseInt(toolsList.get(position).split(" x")[1]);
+            String currentItem = toolsList.get(position);
+            holder.textView.setText(currentItem);
 
-            // Highlighting logic
+            String toolName = currentItem.split(" x")[0];
+            int toolCount = Integer.parseInt(currentItem.split(" x")[1]);
+
+            // 高亮逻辑
             if (compareMap.containsKey(toolName)) {
                 if (compareMap.get(toolName) != toolCount) {
-                    textView.setBackgroundColor(Color.YELLOW); // Highlight inconsistent tools
+                    convertView.setBackgroundColor(Color.YELLOW); // 高亮不一致的工具
                 } else {
-                    textView.setBackgroundColor(Color.TRANSPARENT); // Default background
+                    convertView.setBackgroundColor(Color.TRANSPARENT); // 默认背景
                 }
             } else {
-                textView.setBackgroundColor(Color.TRANSPARENT); // Default background
+                convertView.setBackgroundColor(Color.TRANSPARENT); // 默认背景
             }
 
-            return textView;
+            return convertView;
+        }
+
+        private static class ViewHolder {
+            TextView textView;
         }
     }
 }
