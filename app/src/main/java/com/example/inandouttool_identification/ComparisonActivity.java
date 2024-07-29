@@ -29,6 +29,7 @@ public class ComparisonActivity extends AppCompatActivity {
     String photoPath_OUT = "";
     Boolean Consistent_flags;
     private RelativeLayout loadingView; // 加载动画视图
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +43,11 @@ public class ComparisonActivity extends AppCompatActivity {
         workerImageView_OUT = findViewById(R.id.workerImageView_OUT);
         worker = (Worker) getIntent().getSerializableExtra("worker"); // Keep using Serializable
         workerList = (List<Worker>) getIntent().getSerializableExtra("workerList");
-        //返回按钮
         backButton = findViewById(R.id.backButton);
+        databaseHelper = new DatabaseHelper(this);
+
+        //返回按钮
         backButton.setOnClickListener(v -> {
-            worker.setPhotoPath_OUT(photoPath_OUT);
-            Intent intent = new Intent(ComparisonActivity.this, CameraActivity.class);
-            intent.putExtra("workerList", new ArrayList<>(workerList));
             finish();
         });
         // 获取加载视图
@@ -75,7 +75,10 @@ public class ComparisonActivity extends AppCompatActivity {
                 new Thread(() -> {
                     // 模拟处理延时
                     try {
-                        Thread.sleep(2000); // 实际比较逻辑将放置在这里
+                        Thread.sleep(2000);// 实际比较逻辑将放置在这里
+
+
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -152,13 +155,7 @@ public class ComparisonActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeFile(photoPath_OUT);
             workerImageView_OUT.setImageBitmap(bitmap);
             worker.setPhotoPath_OUT(photoPath_OUT);
-            for (int i = 0; i < workerList.size(); i++) {
-                Worker existingWorker = workerList.get(i);
-                if (existingWorker.getId().equals(worker.getId())) { // 根据 ID 匹配
-                    workerList.set(i, worker); // 更新列表中的对象
-                    break; // 找到后跳出循环
-                }
-            }
+            databaseHelper.updateWorker(worker.getId(), worker.getName(), worker.getPhotoPath_IN(), worker.getPhotoPath_OUT());
         }
         if (requestCode == 2 && resultCode == RESULT_OK) {
             Consistent_flags = data.getBooleanExtra("Consistent_flags", false);

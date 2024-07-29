@@ -1,6 +1,8 @@
 package com.example.inandouttool_identification;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -19,8 +21,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText nameInput, idInput;
     private Button listButton, captureButton, submitButton;
     private String photoPath = "";
-    private List<Worker> workerList = new ArrayList<>();
     private ImageView imageView;
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,15 +34,11 @@ public class MainActivity extends AppCompatActivity {
         captureButton = findViewById(R.id.buttonCamera);
         submitButton = findViewById(R.id.submitButton);
         imageView = findViewById(R.id.imageView);
+        databaseHelper = new DatabaseHelper(this);
 
-        listButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 启动 WorkerListActivity 并传递工人列表
-                Intent intent = new Intent(MainActivity.this, WorkerListActivity.class);
-                intent.putExtra("workerList", new ArrayList<>(workerList));
-                startActivityForResult(intent, 2);
-            }
+        listButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, WorkerListActivity.class);
+            startActivity(intent);
         });
 
         captureButton.setOnClickListener(v -> {
@@ -59,9 +57,15 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     String name = nameInput.getText().toString();
                     String id = idInput.getText().toString();
-                    workerList.add(new Worker(name, id, photoPath ,null));
-                    Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
-                    clearInputs();
+
+                    // 检查工号是否已存在
+                    if (isWorkerIdExists(id)) {
+                        Toast.makeText(this, "工号 " + id + " 已存在", Toast.LENGTH_SHORT).show();
+                    } else {
+                        databaseHelper.addWorker(name, id, photoPath, null);
+                        Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
+                        clearInputs();
+                    }
                 }
             }
         });
@@ -86,6 +90,15 @@ public class MainActivity extends AppCompatActivity {
         photoPath = ""; // 清空照片路径
     }
 
+    public boolean isWorkerIdExists(String workerId) {
+        Worker worker = databaseHelper.getWorkerById(workerId);
+        boolean exists = false;
+        if(worker!=null){
+            exists=true;
+        }
+        return exists;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -93,9 +106,6 @@ public class MainActivity extends AppCompatActivity {
             photoPath = data.getStringExtra("photoPath");
             Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
             imageView.setImageBitmap(bitmap);
-        }
-        if (requestCode == 2 && resultCode == RESULT_OK) {
-            workerList = (List<Worker>) data.getSerializableExtra("workerList");
         }
     }
 }

@@ -25,31 +25,26 @@ public class WorkerListActivity extends AppCompatActivity {
     private ArrayAdapter<Worker> adapter;
     private Button backButton, searchButton;
     private EditText searchInput;
+    private DatabaseHelper databaseHelper;
+    private ListView workerListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_worker_list);
 
-        ListView workerListView = findViewById(R.id.workerListView);
+        workerListView = findViewById(R.id.workerListView);
         searchInput = findViewById(R.id.searchInput);
         backButton = findViewById(R.id.backButton);
-        searchButton = findViewById(R.id.searchButton); // 新增搜索按钮
+        searchButton = findViewById(R.id.searchButton);
 
+        databaseHelper = new DatabaseHelper(this);
+        workerList = databaseHelper.getAllWorkers(); // 从数据库获取工人信息
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, workerList);
         workerListView.setAdapter(adapter);
 
-        // 从 Intent 获取工人列表
-        if (getIntent().hasExtra("workerList")) {
-            List<Worker> receivedWorkers = (List<Worker>) getIntent().getSerializableExtra("workerList");
-            updateWorkerList(receivedWorkers);
-        }
-
         // 返回按钮点击事件
         backButton.setOnClickListener(v -> {
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("workerList", new ArrayList<>(workerList)); // 传回workerList
-            setResult(RESULT_OK, resultIntent);
             finish();
         });
 
@@ -80,13 +75,11 @@ public class WorkerListActivity extends AppCompatActivity {
     // 执行搜索
     private void performSearch() {
         String searchQuery = searchInput.getText().toString().trim();
-        for (Worker worker : workerList) {
-            if (worker.getId().equals(searchQuery)) {
-                startComparisonActivity(worker);
-                return;
-            }
+        Worker worker = databaseHelper.getWorkerById(searchQuery); // 根据需查询的工人ID传入参数
+        if (worker != null) {
+            startComparisonActivity(worker);
+            return;
         }
-        // 若未找到
         Toast.makeText(this, "无此人", Toast.LENGTH_SHORT).show();
     }
 
@@ -96,15 +89,6 @@ public class WorkerListActivity extends AppCompatActivity {
         intent.putExtra("worker", worker);
         intent.putExtra("workerList", new ArrayList<>(workerList));
         startActivityForResult(intent,1);
-    }
-
-    // 更新工人列表
-    public void updateWorkerList(List<Worker> workers) {
-        workerList.clear();
-        if (workers != null) {
-            workerList.addAll(workers);
-        }
-        adapter.notifyDataSetChanged();
     }
 
     private void deletePhoto(String photoPath) {
@@ -124,20 +108,16 @@ public class WorkerListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            Log.d("WorkerList", "Before removal: " + workerList.toString());
             Worker worker = (Worker) data.getSerializableExtra("worker");
             if (worker != null) {
                 String photoPath_IN = worker.getPhotoPath_IN();
                 String photoPath_OUT = worker.getPhotoPath_OUT();
                 deletePhoto(photoPath_IN);
-                if (photoPath_OUT != null && !photoPath_OUT.isEmpty()) {
-                    deletePhoto(photoPath_OUT);
-                }
+                deletePhoto(photoPath_OUT);
             }
+            databaseHelper.deleteWorker(worker.getId());
             workerList.remove(worker);
-            Log.d("WorkerList", "After removal: " + workerList.toString());
             adapter.notifyDataSetChanged();
         }
     }
-
 }
