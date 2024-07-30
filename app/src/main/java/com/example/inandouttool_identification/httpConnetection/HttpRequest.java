@@ -43,25 +43,19 @@ public class HttpRequest {
                 outputStream.flush();
             }
 
-            intputStream = httpConn.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(intputStream));
             StringBuilder response = new StringBuilder();
+            while (intputStream == null){
+                intputStream = httpConn.getInputStream();
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(intputStream));
             String line;
             while ((line = reader.readLine()) != null) {
                 response.append(line);
             }
-
             jsonResponse = response.toString();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(intputStream));
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            response.append(line);
         }
 
         return jsonResponse;
