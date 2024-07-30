@@ -126,6 +126,7 @@ public class ComparisonActivity extends AppCompatActivity {
                         imageInCheckedPath = new File(storageDir, image1CheckedPath).getAbsolutePath();
                         imageOutCheckedPath = new File(storageDir, image2CheckedPath).getAbsolutePath();
 
+
                         result1 = (ArrayList<Map<String, Object>>) responseJson.get("result1");
                         result2 = (ArrayList<Map<String, Object>>) responseJson.get("result2");
 
