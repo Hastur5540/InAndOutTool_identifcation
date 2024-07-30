@@ -1,4 +1,4 @@
-package com.example.inandouttool_identification;
+package com.example.inandouttool_identification.entity;
 
 import java.io.Serializable;
 
@@ -8,12 +8,33 @@ public class Worker implements Serializable {
     private String photoPath_IN;  // 进厂照片路径
     private String photoPath_OUT; // 出厂照片路径
 
+    private String photoPath_IN_Checked; //进厂识别后的照片路径
+    private String photoPath_OUT_Checked; //出厂识别后的照片路径
+
     // 构造函数
-    public Worker(String name, String id, String photoPath_IN, String photoPath_OUT) {
+    public Worker(String name, String id, String photoPath_IN, String photoPath_OUT, String photoPath_IN_Checked, String photoPath_OUT_Checked) {
         this.name = name;
         this.id = id;
         this.photoPath_IN = photoPath_IN;
         this.photoPath_OUT = photoPath_OUT;
+        this.photoPath_IN_Checked = photoPath_IN_Checked;
+        this.photoPath_OUT_Checked = photoPath_OUT_Checked;
+    }
+
+    public String getPhotoPath_IN_Checked() {
+        return photoPath_IN_Checked;
+    }
+
+    public void setPhotoPath_IN_Checked(String photoPath_IN_Checked) {
+        this.photoPath_IN_Checked = photoPath_IN_Checked;
+    }
+
+    public String getPhotoPath_OUT_Checked() {
+        return photoPath_OUT_Checked;
+    }
+
+    public void setPhotoPath_OUT_Checked(String photoPath_OUT_Checked) {
+        this.photoPath_OUT_Checked = photoPath_OUT_Checked;
     }
 
     // Getter 和 Setter 方法

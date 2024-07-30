@@ -1,13 +1,10 @@
-package com.example.inandouttool_identification;
+package com.example.inandouttool_identification.activities;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +12,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.inandouttool_identification.R;
+import com.example.inandouttool_identification.database.DatabaseHelper;
+import com.example.inandouttool_identification.entity.Worker;
 
 import java.io.File;
 import java.util.ArrayList;

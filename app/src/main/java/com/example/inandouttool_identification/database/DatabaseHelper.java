@@ -1,5 +1,5 @@
 
-package com.example.inandouttool_identification;
+package com.example.inandouttool_identification.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.example.inandouttool_identification.entity.Worker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE workers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, workerId TEXT, photoPath_IN TEXT, photoPath_OUT TEXT)");
+        db.execSQL("CREATE TABLE workers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, workerId TEXT, photoPath_IN TEXT, photoPath_OUT TEXT, photoPath_IN_Checked TEXT, photoPath_OUT_Checked TEXT)");
     }
 
     @Override
@@ -48,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     String workerId = cursor.getString(workerIdIndex);
                     String photoPath_IN = cursor.getString(photoPathInIndex);
                     String photoPath_OUT = cursor.getString(photoPathOutIndex);
-                    workers.add(new Worker(name, workerId, photoPath_IN, photoPath_OUT));
+                    workers.add(new Worker(name, workerId, photoPath_IN, photoPath_OUT, "", ""));
                 } else {
                     Log.e("DatabaseError", "Column not found in workers table");
                 }
@@ -106,11 +108,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int photoPathInIndex = cursor.getColumnIndex("photoPath_IN");
                 int photoPathOutIndex = cursor.getColumnIndex("photoPath_OUT");
 
+                int photoInCheckedIdIndex = cursor.getColumnIndex("photoPath_IN_Checked");
+                int photoOutCheckedIdIndex = cursor.getColumnIndex("photoPath_OUT_Checked");
+
                 if (nameIndex != -1 && photoPathInIndex != -1 && photoPathOutIndex != -1) {
                     String name = cursor.getString(nameIndex);
                     String photoPath_IN = cursor.getString(photoPathInIndex);
                     String photoPath_OUT = cursor.getString(photoPathOutIndex);
-                    worker = new Worker(name, workerId, photoPath_IN, photoPath_OUT);
+                    String photoInCheckedPath = cursor.getString(photoInCheckedIdIndex);
+                    String photoOutCheckedPath = cursor.getString(photoOutCheckedIdIndex);
+                    worker = new Worker(name, workerId, photoPath_IN, photoPath_OUT, photoInCheckedPath, photoOutCheckedPath);
                 } else {
                     Log.e("DatabaseError", "Column not found in workers table");
                 }
@@ -147,4 +154,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.close();
         }
     }
+
+
+    public void updateCheckedImagePath(String workerId, String checkedImage1Path, String checkedImage2Path) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("photoPath_IN_Checked", checkedImage1Path);
+            values.put("photoPath_OUT_Checked", checkedImage2Path);
+
+            // 更新指定 workerId 的记录
+            int updatedRows = db.update("workers", values, "workerId = ?", new String[]{workerId});
+            if (updatedRows > 0) {
+                Log.d("DatabaseHelper", "Updated checked image paths for worker with ID: " + workerId);
+            } else {
+                Log.e("DatabaseError", "No worker found with ID: " + workerId);
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseError", "Error updating checked image paths: " + e.getMessage());
+        } finally {
+            db.close();
+        }
+    }
+
 }

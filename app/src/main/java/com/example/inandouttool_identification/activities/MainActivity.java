@@ -1,12 +1,9 @@
-package com.example.inandouttool_identification;
+package com.example.inandouttool_identification.activities;
 
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -14,8 +11,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.example.inandouttool_identification.R;
+import com.example.inandouttool_identification.entity.Worker;
+import com.example.inandouttool_identification.database.DatabaseHelper;
 
 public class MainActivity extends AppCompatActivity {
     private EditText nameInput, idInput;
@@ -70,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private boolean validateInputs() {
         if (nameInput.getText().toString().trim().isEmpty()) {

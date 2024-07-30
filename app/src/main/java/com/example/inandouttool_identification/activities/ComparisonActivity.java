@@ -1,10 +1,10 @@
-package com.example.inandouttool_identification;
+package com.example.inandouttool_identification.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,10 +14,21 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+
+import com.example.inandouttool_identification.httpConnetection.HttpRequest;
+import com.example.inandouttool_identification.R;
+import com.example.inandouttool_identification.entity.Worker;
+import com.example.inandouttool_identification.database.DatabaseHelper;
+import com.example.inandouttool_identification.utils.ImageProcess;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ComparisonActivity extends AppCompatActivity {
     private EditText toolsInput;
@@ -30,6 +41,15 @@ public class ComparisonActivity extends AppCompatActivity {
     Boolean Consistent_flags;
     private RelativeLayout loadingView; // 加载动画视图
     private DatabaseHelper databaseHelper;
+
+    // 得到的的处理后的图片
+    String image1Base64 = null;
+    String image2Base64 = null;
+
+    String imageInCheckedPath = null;
+    String imageOutCheckedPath = null;
+    Bundle bundle_In = new Bundle();
+    Bundle bundle_Out = new Bundle();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,32 +102,57 @@ public class ComparisonActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    //后端返回的数据
-                    Bundle bundle_IN = new Bundle();
-                    bundle_IN.putInt("钳子", 2);
-                    bundle_IN.putInt("卡簧", 0);
-                    bundle_IN.putInt("螺丝刀", 1);
-                    bundle_IN.putInt("插排", 0);
-                    bundle_IN.putInt("锉刀", 1);
-                    bundle_IN.putInt("橡皮锤", 0);
-                    bundle_IN.putInt("扳手", 1);
-                    bundle_IN.putInt("六角扳手", 1);
-                    bundle_IN.putInt("记号笔", 0);
-                    bundle_IN.putInt("剪刀", 1);
-                    bundle_IN.putInt("万用剪刀", 1);
 
-                    Bundle bundle_OUT = new Bundle();
-                    bundle_OUT.putInt("钳子", 0);
-                    bundle_OUT.putInt("卡簧", 0);
-                    bundle_OUT.putInt("螺丝刀", 1);
-                    bundle_OUT.putInt("插排", 0);
-                    bundle_OUT.putInt("锉刀", 1);
-                    bundle_OUT.putInt("橡皮锤", 1);
-                    bundle_OUT.putInt("扳手", 1);
-                    bundle_OUT.putInt("六角扳手", 0);
-                    bundle_OUT.putInt("记号笔", 0);
-                    bundle_OUT.putInt("剪刀", 0);
-                    bundle_OUT.putInt("万用剪刀", 1);
+
+                    HttpRequest httpRequest = new HttpRequest("/process_image");
+                    String photoPathIn = worker.getPhotoPath_IN();
+                    String photoPathOut = worker.getPhotoPath_OUT();
+
+                    ArrayList<Map<String, Object>> result1 = null;
+                    ArrayList<Map<String, Object>> result2 = null;
+
+                    try {
+                        String response = httpRequest.getCompareResult(photoPathIn, photoPathOut);
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        Map<String, Object> responseJson = objectMapper.readValue(response, new TypeReference<Map<String, Object>>(){});
+
+                        image1Base64 = Objects.requireNonNull(responseJson.get("image_base64_1")).toString();
+                        image2Base64 = Objects.requireNonNull(responseJson.get("image_base64_2")).toString();
+                        String image1CheckedPath = worker.getId() + "_IN_Checked.jpg";
+                        String image2CheckedPath = worker.getId() + "_OUT_Checked.jpg";
+                        ImageProcess imageProcess = new ImageProcess();
+                        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+                        imageInCheckedPath = new File(storageDir, image1CheckedPath).getAbsolutePath();
+                        imageOutCheckedPath = new File(storageDir, image2CheckedPath).getAbsolutePath();
+
+                        imageProcess.saveBase64ToFile(image1Base64, imageInCheckedPath);
+                        imageProcess.saveBase64ToFile(image2Base64, imageOutCheckedPath);
+
+                        databaseHelper.updateCheckedImagePath(worker.getId(), imageInCheckedPath, imageOutCheckedPath);
+
+                        result1 = (ArrayList<Map<String, Object>>) responseJson.get("result1");
+                        result2 = (ArrayList<Map<String, Object>>) responseJson.get("result2");
+
+                        if (result1 != null){
+                            for (Map<String, Object> result: result1) {
+                                String className = result.get("class_name").toString();
+                                int num = Integer.parseInt(result.get("count").toString());
+                                bundle_In.putInt(className, num);
+                            }
+                        }
+                        if (result2!=null){
+                            for (Map<String, Object> result:
+                                    result2) {
+                                String className = result.get("class_name").toString();
+                                int num = Integer.parseInt(result.get("count").toString());
+                                bundle_Out.putInt(className, num);
+                            }
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
 
                     // 处理结束后，更新UI
                     runOnUiThread(() -> {
@@ -115,11 +160,13 @@ public class ComparisonActivity extends AppCompatActivity {
                         // 准备跳转到新页面
                         Intent intent = new Intent(ComparisonActivity.this, ToolCheckActivity.class);
                         if(worker.getId().equals("000")){
-                            intent.putExtra("tools_IN", bundle_IN);
-                            intent.putExtra("tools_OUT", bundle_OUT);
+                            intent.putExtra("tools_IN", bundle_In);
+                            intent.putExtra("tools_OUT", bundle_Out);
                         }else{
-                            intent.putExtra("tools_IN", bundle_IN);
-                            intent.putExtra("tools_OUT", bundle_IN);
+                            intent.putExtra("tools_IN", bundle_In);
+                            intent.putExtra("tools_OUT", bundle_Out);
+                            intent.putExtra("in_checked_path", imageInCheckedPath);
+                            intent.putExtra("out_checked_path", imageOutCheckedPath);
                         }
                         startActivityForResult(intent, 2);
                         // 这里处理工具比较的逻辑
@@ -167,4 +214,6 @@ public class ComparisonActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }

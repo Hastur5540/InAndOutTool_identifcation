@@ -58,4 +58,9 @@ dependencies {
 
     // Optional - CameraX Extensions library (for additional features like Night Mode, HDR, etc.)
     implementation("androidx.camera:camera-extensions:1.0.0")
+
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.12.3")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.3")
 }

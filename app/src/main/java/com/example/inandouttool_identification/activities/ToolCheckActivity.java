@@ -1,8 +1,11 @@
-package com.example.inandouttool_identification;
+package com.example.inandouttool_identification.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +17,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.inandouttool_identification.R;
+import com.example.inandouttool_identification.database.DatabaseHelper;
+import com.example.inandouttool_identification.entity.Worker;
+import com.example.inandouttool_identification.utils.ImageProcess;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,12 +98,21 @@ public class ToolCheckActivity extends AppCompatActivity {
             Consistent_flags = enterToolsMap.equals(exitToolsMap);
             tvToolConsistency.setText(Consistent_flags ? "工具一致" : "工具不一致");
             tvToolConsistency.setTextColor(Consistent_flags ? Color.GREEN : Color.RED);
+
+
+            ImageProcess imageProcessor = new ImageProcess();
+            String imageInCheckedPath = getIntent().getStringExtra("in_checked_path");
+            String imageOutCheckedPath = getIntent().getStringExtra("out_checked_path");
+            Bitmap imageInCheckedBitmap = imageProcessor.loadImageFromFile(imageInCheckedPath);
+            Bitmap imageOutCheckedBitmap = imageProcessor.loadImageFromFile(imageOutCheckedPath);
+
+
             if (Consistent_flags) {
-                workerImageView_IN.setImageResource(R.drawable.ic_enter_tool);
-                workerImageView_OUT.setImageResource(R.drawable.ic_enter_tool);
+                workerImageView_IN.setImageBitmap(imageInCheckedBitmap);
+                workerImageView_OUT.setImageBitmap(imageOutCheckedBitmap);
             } else {
-                workerImageView_IN.setImageResource(R.drawable.ic_enter_tool);
-                workerImageView_OUT.setImageResource(R.drawable.ic_exit_tool);
+                workerImageView_IN.setImageBitmap(imageInCheckedBitmap);
+                workerImageView_OUT.setImageBitmap(imageOutCheckedBitmap);
 
                 // 点击一致性文本查看不一致情况
                 tvToolConsistency.setOnClickListener(v -> showDiscrepancyDialog(enterToolsMap, exitToolsMap));
@@ -197,5 +214,13 @@ public class ToolCheckActivity extends AppCompatActivity {
         private static class ViewHolder {
             TextView textView;
         }
+    }
+
+    public static Bitmap decodeBase64ToBitmap(String base64String) {
+        // 解码 Base64 字符串为字节数组
+        byte[] decodedBytes = Base64.decode(base64String, Base64.DEFAULT);
+
+        // 将字节数组转换为 Bitmap
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     }
 }

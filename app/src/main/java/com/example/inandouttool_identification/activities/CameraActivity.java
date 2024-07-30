@@ -1,4 +1,4 @@
-package com.example.inandouttool_identification;
+package com.example.inandouttool_identification.activities;
 
 import android.os.Environment;
 import android.widget.RelativeLayout;
@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
@@ -37,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
+import com.example.inandouttool_identification.R;
 import com.google.common.util.concurrent.ListenableFuture;
 
 
