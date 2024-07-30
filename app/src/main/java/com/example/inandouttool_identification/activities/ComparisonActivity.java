@@ -204,6 +204,8 @@ public class ComparisonActivity extends AppCompatActivity {
         }
         if (requestCode == 2 && resultCode == RESULT_OK) {
             Consistent_flags = data.getBooleanExtra("Consistent_flags", false);
+            bundle_In.clear();
+            bundle_Out.clear();
             if(Consistent_flags){
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("worker", worker);
