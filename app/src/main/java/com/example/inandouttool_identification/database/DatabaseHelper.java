@@ -50,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     String workerId = cursor.getString(workerIdIndex);
                     String photoPath_IN = cursor.getString(photoPathInIndex);
                     String photoPath_OUT = cursor.getString(photoPathOutIndex);
-                    workers.add(new Worker(name, workerId, photoPath_IN, photoPath_OUT, "", ""));
+                    workers.add(new Worker(name, workerId, photoPath_IN, photoPath_OUT));
                 } else {
                     Log.e("DatabaseError", "Column not found in workers table");
                 }
@@ -108,16 +108,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int photoPathInIndex = cursor.getColumnIndex("photoPath_IN");
                 int photoPathOutIndex = cursor.getColumnIndex("photoPath_OUT");
 
-                int photoInCheckedIdIndex = cursor.getColumnIndex("photoPath_IN_Checked");
-                int photoOutCheckedIdIndex = cursor.getColumnIndex("photoPath_OUT_Checked");
-
                 if (nameIndex != -1 && photoPathInIndex != -1 && photoPathOutIndex != -1) {
                     String name = cursor.getString(nameIndex);
                     String photoPath_IN = cursor.getString(photoPathInIndex);
                     String photoPath_OUT = cursor.getString(photoPathOutIndex);
-                    String photoInCheckedPath = cursor.getString(photoInCheckedIdIndex);
-                    String photoOutCheckedPath = cursor.getString(photoOutCheckedIdIndex);
-                    worker = new Worker(name, workerId, photoPath_IN, photoPath_OUT, photoInCheckedPath, photoOutCheckedPath);
+                    worker = new Worker(name, workerId, photoPath_IN, photoPath_OUT);
                 } else {
                     Log.e("DatabaseError", "Column not found in workers table");
                 }
