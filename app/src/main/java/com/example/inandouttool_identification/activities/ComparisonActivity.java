@@ -122,10 +122,8 @@ public class ComparisonActivity extends AppCompatActivity {
                         String image2CheckedPath = worker.getId() + "_OUT_Checked.jpg";
                         ImageProcess imageProcess = new ImageProcess();
                         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
                         imageInCheckedPath = new File(storageDir, image1CheckedPath).getAbsolutePath();
                         imageOutCheckedPath = new File(storageDir, image2CheckedPath).getAbsolutePath();
-
                         imageProcess.saveBase64ToFile(image1Base64, imageInCheckedPath);
                         imageProcess.saveBase64ToFile(image2Base64, imageOutCheckedPath);
 

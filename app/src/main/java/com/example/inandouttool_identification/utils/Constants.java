@@ -7,7 +7,7 @@ public final class Constants {
         throw new AssertionError("Cannot instantiate the Constants class");
     }
 
-    public static final String TARGET_IP_ADDRESS = "http://118.178.133.44";
+    public static final String TARGET_IP_ADDRESS = "http://172.29.27.185";
 
     public static final String PORT = "5000";
 
