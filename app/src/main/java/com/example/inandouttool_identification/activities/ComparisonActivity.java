@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ComparisonActivity extends AppCompatActivity {
-    private EditText toolsInput;
     private Button compareButton, captureButton,backButton;
     private ImageView workerImageView_IN;
     private ImageView workerImageView_OUT;
@@ -42,6 +41,7 @@ public class ComparisonActivity extends AppCompatActivity {
     private RelativeLayout loadingView; // 加载动画视图
     private DatabaseHelper databaseHelper;
 
+    private final ImageProcess imageProcessor = new ImageProcess();
     // 得到的的处理后的图片
     String image1Base64 = null;
     String image2Base64 = null;
@@ -51,12 +51,11 @@ public class ComparisonActivity extends AppCompatActivity {
     Bundle bundle_In = new Bundle();
     Bundle bundle_Out = new Bundle();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comparison);
-
-        toolsInput = findViewById(R.id.toolsInput);
         compareButton = findViewById(R.id.compareButton);
         captureButton = findViewById(R.id.captureButton);
         workerImageView_IN = findViewById(R.id.workerImageView_IN);
@@ -65,23 +64,24 @@ public class ComparisonActivity extends AppCompatActivity {
         workerList = (List<Worker>) getIntent().getSerializableExtra("workerList");
         backButton = findViewById(R.id.backButton);
         databaseHelper = new DatabaseHelper(this);
-
         //返回按钮
         backButton.setOnClickListener(v -> {
             finish();
         });
         // 获取加载视图
         loadingView = findViewById(R.id.loadingView);
-        toolsInput.setText(worker.getId());
         String photoPath_IN = worker.getPhotoPath_IN();
         Bitmap bitmap = BitmapFactory.decodeFile(photoPath_IN);
-        workerImageView_IN.setImageBitmap(bitmap);
+        workerImageView_IN.post(() -> {
+            Bitmap adjustedBitmap = imageProcessor.adjustImageSize(bitmap, workerImageView_IN);
+            workerImageView_IN.setImageBitmap(adjustedBitmap);
+        });
 
         // Capture button functionality
         captureButton.setOnClickListener(v -> {
             Intent intent = new Intent(ComparisonActivity.this, CameraActivity.class);
             intent.putExtra("workerId", worker.getId());
-            intent.putExtra("inOutFlag", "out");
+            intent.putExtra("imageType", "out");
             startActivityForResult(intent, 1);
         });
 
@@ -93,15 +93,6 @@ public class ComparisonActivity extends AppCompatActivity {
                 // 显示加载动画
                 showLoading();
                 new Thread(() -> {
-                    // 模拟处理延时
-                    try {
-                        Thread.sleep(2000);// 实际比较逻辑将放置在这里
-
-
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
 
 
                     HttpRequest httpRequest = new HttpRequest("/process_image");
@@ -120,12 +111,11 @@ public class ComparisonActivity extends AppCompatActivity {
                         image2Base64 = Objects.requireNonNull(responseJson.get("image_base64_2")).toString();
                         String image1CheckedPath = worker.getId() + "_IN_Checked.jpg";
                         String image2CheckedPath = worker.getId() + "_OUT_Checked.jpg";
-                        ImageProcess imageProcess = new ImageProcess();
                         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                         imageInCheckedPath = new File(storageDir, image1CheckedPath).getAbsolutePath();
                         imageOutCheckedPath = new File(storageDir, image2CheckedPath).getAbsolutePath();
-                        imageProcess.saveBase64ToFile(image1Base64, imageInCheckedPath);
-                        imageProcess.saveBase64ToFile(image2Base64, imageOutCheckedPath);
+                        imageProcessor.saveBase64ToFile(image1Base64, imageInCheckedPath);
+                        imageProcessor.saveBase64ToFile(image2Base64, imageOutCheckedPath);
 
                         result1 = (ArrayList<Map<String, Object>>) responseJson.get("result1");
                         result2 = (ArrayList<Map<String, Object>>) responseJson.get("result2");
@@ -193,7 +183,7 @@ public class ComparisonActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK) {
+        if (resultCode == 1) {
             photoPath_OUT = data.getStringExtra("photoPath");
             Bitmap bitmap = BitmapFactory.decodeFile(photoPath_OUT);
             workerImageView_OUT.setImageBitmap(bitmap);

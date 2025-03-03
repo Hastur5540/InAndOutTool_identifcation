@@ -3,6 +3,8 @@ package com.example.inandouttool_identification.utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,6 +36,24 @@ public class ImageProcess {
         } else {
             return null; // 文件不存在，返回 null
         }
+    }
+
+    public Bitmap adjustImageSize(Bitmap originalBitmap, ImageView imageView) {
+        int imageViewHeight = imageView.getHeight();
+        // 获取原始 Bitmap 的宽度和高度
+        int originalWidth = originalBitmap.getWidth();
+        int originalHeight = originalBitmap.getHeight();
+
+        // 根据 imageView 的高度计算缩放后的宽度，保持宽高比
+        float ratio = (float) imageViewHeight / originalHeight;
+        int scaledWidth = (int) (originalWidth * ratio);
+        int scaledHeight = imageViewHeight;
+
+        ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+        layoutParams.width = scaledWidth; // 设置宽度
+        imageView.setLayoutParams(layoutParams);
+        // 创建调整后的 Bitmap
+        return Bitmap.createScaledBitmap(originalBitmap, scaledWidth, scaledHeight, true);
     }
 
 }

@@ -16,22 +16,30 @@
             android:text="返回"
             android:layout_margin="16dp" />
 
-        <EditText
-            android:id="@+id/toolsInput"
+<!--        <EditText-->
+<!--            android:id="@+id/toolsInput"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:hint="输入ID" />-->
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="输入ID" />
-
+            android:layout_height="30dp"
+            android:textSize="20dp"
+            android:text="进入"/>
         <ImageView
             android:id="@+id/workerImageView_IN"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_width="240dp"
+            android:layout_height="320dp"
             android:scaleType="centerCrop" />
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:textSize="20dp"
+            android:text="离开"/>
         <ImageView
             android:id="@+id/workerImageView_OUT"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_width="240dp"
+            android:layout_height="320dp"
             android:scaleType="centerCrop" />
 
         <!-- 填充剩余空间的 View -->
@@ -66,9 +74,9 @@
         android:id="@+id/loadingView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         android:background="@android:color/transparent"
-        android:gravity="center">
+        android:gravity="center"
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_width="wrap_content"

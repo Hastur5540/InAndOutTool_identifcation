@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.inandouttool_identification.R;
 import com.example.inandouttool_identification.database.DatabaseHelper;
 import com.example.inandouttool_identification.entity.Worker;
+import com.example.inandouttool_identification.entity.WorkerAdapter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,13 +36,15 @@ public class WorkerListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_worker_list);
 
         workerListView = findViewById(R.id.workerListView);
-        searchInput = findViewById(R.id.searchInput);
+//        searchInput = findViewById(R.id.searchInput);
         backButton = findViewById(R.id.backButton);
-        searchButton = findViewById(R.id.searchButton);
+//        searchButton = findViewById(R.id.searchButton);
 
         databaseHelper = new DatabaseHelper(this);
-        workerList = databaseHelper.getAllWorkers(); // 从数据库获取工人信息
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, workerList);
+        workerList = databaseHelper.getAllWorkers(); // 获取工人列表
+
+        // 使用自定义适配器
+        WorkerAdapter adapter = new WorkerAdapter(this, workerList, databaseHelper);
         workerListView.setAdapter(adapter);
 
         // 返回按钮点击事件
@@ -50,7 +53,7 @@ public class WorkerListActivity extends AppCompatActivity {
         });
 
         // 搜索按钮点击事件
-        searchButton.setOnClickListener(v -> performSearch());
+//        searchButton.setOnClickListener(v -> performSearch());
 
         // 列表项点击事件
         workerListView.setOnItemClickListener((parent, view, position, id) -> {
@@ -59,18 +62,18 @@ public class WorkerListActivity extends AppCompatActivity {
         });
 
         // 搜索框文本变化监听
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // 实时搜索，这里可以保留
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
+//        searchInput.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                // 实时搜索，这里可以保留
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {}
+//        });
     }
 
     // 执行搜索

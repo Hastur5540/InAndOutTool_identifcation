@@ -32,7 +32,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.CameraActivity" />
+        <activity android:name=".activities.CameraActivity"/>
         <!--activity android:name=".CameraActivity_OUT" /-->
         <activity android:name=".activities.ToolCheckActivity"/>
         <activity android:name=".activities.ComparisonActivity" />

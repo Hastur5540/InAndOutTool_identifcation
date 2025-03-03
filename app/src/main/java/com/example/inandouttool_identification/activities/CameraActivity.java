@@ -1,5 +1,7 @@
 package com.example.inandouttool_identification.activities;
 
+import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 import android.os.Environment;
 import android.widget.RelativeLayout;
 import android.Manifest;
@@ -34,10 +36,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.example.inandouttool_identification.R;
+import com.example.inandouttool_identification.utils.Constants;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.example.inandouttool_identification.utils.AutoRecog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class CameraActivity extends AppCompatActivity {
@@ -45,8 +53,10 @@ public class CameraActivity extends AppCompatActivity {
     private Button captureButton;
     private Button backButton;
     private ImageView imageView;
+    private RelativeLayout loadingView; // 加载动画视图
 
     private String photoPath;
+    private Map<String,String> autoRecogRes;
     private String w_id = null;
 
     private ImageCapture capturedImg;
@@ -55,14 +65,21 @@ public class CameraActivity extends AppCompatActivity {
     private HashMap<String, Integer> screenHW = new HashMap<>();
 
 
-    private float CAMERA_PREVIEW_HW_RATIO = -1;
+    private float CAMERA_PREVIEW_HW_RATIO = (float)1.33;
     private float FRAME_CAMERAPREVIEW_RATIO = (float) 0.8;
     private float CAPTURE_FRAME_HW_RATIO = (float) 1.4;
     private float MAX_HEIGHT_RATIO = (float) 3.5/4;
+    private AutoRecog autoRecog = new AutoRecog("/face_recog");
 
+    private int CAMERA_PREVIEW_HEIGHT = -1;
+    private int CAMERA_PREVIEW_WIDTH = -1;
     private ProcessCameraProvider processCameraProvider;
 
+    private String name;
+    private String wid;
 
+
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +90,7 @@ public class CameraActivity extends AppCompatActivity {
         captureFrame = findViewById(R.id.captureFrame);
         captureButton = findViewById(R.id.captureButton_1);
         backButton = findViewById(R.id.backButton);
+        loadingView = findViewById(R.id.loadingView_1);
 
         // 得当当前activity的h 和 w
         getScreenHW(this);
@@ -90,38 +108,40 @@ public class CameraActivity extends AppCompatActivity {
             startCamera();
         }
 
-        startCamera();
-
-
         captureButton.setOnClickListener(v -> capturePhoto());
         backButton.setOnClickListener(v -> finish());
     }
 
 
-
-
-
-
     // 根据预定比例常量重塑View组件
-    private void reshapeView(View view, int height_limit, int width, float hwRatio){
+    private void reshapeView(View view, int height, int width, float hwRatio, int rotationDegree){
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) view.getLayoutParams();
         params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-        params.width = width;
-        params.height = Math.min((int)(params.width*hwRatio), height_limit);
+        if (rotationDegree == 0) {
+            params.width = width;
+            params.height = (int) (width * hwRatio);
+        }else{
+            params.height = height;
+            params.width = (int) (height * hwRatio);
+        }
         view.setLayoutParams(params);
         view.requestLayout();
+
+        System.out.println("123");
     }
 
 
     private void startCamera() {
+        captureFrame.setVisibility(View.GONE);
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        int rotationDegrees = getWindowManager().getDefaultDisplay().getRotation();
+        rotationDegrees = rotationDegrees % 2;
         if (CAMERA_PREVIEW_HW_RATIO != -1){
-            reshapeView(cameraPreview, (int) (screenHW.get("height") * MAX_HEIGHT_RATIO), screenHW.get("width"), CAMERA_PREVIEW_HW_RATIO);
-            reshapeView(captureFrame, (int) (screenHW.get("height") * MAX_HEIGHT_RATIO * 0.8), (int) (screenHW.get("width") * FRAME_CAMERAPREVIEW_RATIO), CAPTURE_FRAME_HW_RATIO);
+            getScreenHW(this);
+            reshapeView(cameraPreview, screenHW.get("height") , screenHW.get("width"), CAMERA_PREVIEW_HW_RATIO, rotationDegrees);
+            reshapeView(captureFrame, (int)(screenHW.get("height") * FRAME_CAMERAPREVIEW_RATIO) , (int)(screenHW.get("width")* FRAME_CAMERAPREVIEW_RATIO), CAPTURE_FRAME_HW_RATIO, rotationDegrees);
+            captureFrame.setVisibility(View.VISIBLE);
         }
-
-
-
 
         cameraProviderFuture.addListener(() -> {
             try {
@@ -141,16 +161,15 @@ public class CameraActivity extends AppCompatActivity {
                     capturedImg.takePicture(ContextCompat.getMainExecutor(this), new ImageCapture.OnImageCapturedCallback() {
                         @Override
                         public void onCaptureSuccess(@NonNull ImageProxy image) {
+                            CAMERA_PREVIEW_HW_RATIO = (float) image.getHeight() / image.getWidth();
+                            if(CAMERA_PREVIEW_HW_RATIO < 1.){
+                                CAMERA_PREVIEW_HW_RATIO = 1 / CAMERA_PREVIEW_HW_RATIO;
+                            }
 
-                            int rotationDegree = image.getImageInfo().getRotationDegrees();
-                            if (rotationDegree == 0 || rotationDegree == 180)
-                                CAMERA_PREVIEW_HW_RATIO = (float) image.getHeight() / image.getWidth();
-                            if (rotationDegree == 90 || rotationDegree == 270)
-                                CAMERA_PREVIEW_HW_RATIO = (float) image.getWidth() / image.getHeight();
-
-                            reshapeView(cameraPreview, (int) (screenHW.get("height") * MAX_HEIGHT_RATIO), screenHW.get("width"), CAMERA_PREVIEW_HW_RATIO);
-                            reshapeView(captureFrame, (int) (screenHW.get("height") * MAX_HEIGHT_RATIO * 0.8), (int) (screenHW.get("width") * FRAME_CAMERAPREVIEW_RATIO), CAPTURE_FRAME_HW_RATIO);
-
+                            int rotationDegrees = getWindowManager().getDefaultDisplay().getRotation() % 2;
+                            reshapeView(cameraPreview, screenHW.get("height") , screenHW.get("width"), CAMERA_PREVIEW_HW_RATIO, rotationDegrees);
+                            reshapeView(captureFrame, (int)(screenHW.get("height") * FRAME_CAMERAPREVIEW_RATIO) , (int)(screenHW.get("width")* FRAME_CAMERAPREVIEW_RATIO), CAPTURE_FRAME_HW_RATIO, rotationDegrees);
+                            captureFrame.setVisibility(View.VISIBLE);
                             image.close();
 
 
@@ -162,7 +181,7 @@ public class CameraActivity extends AppCompatActivity {
                             exception.printStackTrace();
                         }
                     });
-                }else{
+                } else {
                     processCameraProvider.bindToLifecycle(this, cameraSelector, preview, capturedImg);
                 }
 
@@ -206,14 +225,13 @@ public class CameraActivity extends AppCompatActivity {
 
 
     private Bitmap imageProxyToBitmap(ImageProxy image) {
-        int rotationDegrees = image.getImageInfo().getRotationDegrees();
 
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         byte[] bytes = new byte[buffer.remaining()];
         buffer.get(bytes);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
-        return rotateBitmap(bitmap, rotationDegrees);
+        return bitmap;
     }
 
 
@@ -230,6 +248,8 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private Bitmap cropBitmapToFrame(Bitmap original, View frame) {
+        int rotationDegrees = getWindowManager().getDefaultDisplay().getRotation() % 2;
+
         int cameraPreviewHeight = cameraPreview.getHeight();
         int cameraPreviewWidth = cameraPreview.getWidth();
 
@@ -250,10 +270,15 @@ public class CameraActivity extends AppCompatActivity {
         int preFrameX = previewLoc[0];
         int preFrameY = previewLoc[1];
 
-
+        int startX = frameX - preFrameX;
+        int startY = frameY - preFrameY;
         // 返回截取结果
 //        return original;
-        return Bitmap.createBitmap(scalaredImg, frameX-preFrameX, frameY-preFrameY, frameWidth, frameHeight);
+        if(rotationDegrees==0){
+            return Bitmap.createBitmap(scalaredImg, startX, startY, frameWidth, frameHeight);
+        }else{
+            return Bitmap.createBitmap(scalaredImg, startX, startY, frameWidth, frameHeight);
+        }
     }
 
 
@@ -268,9 +293,14 @@ public class CameraActivity extends AppCompatActivity {
     private void toCheckView(Bitmap pic){
         setContentView(R.layout.captured_photo_check);
         imageView = findViewById(R.id.previewImageView);
+        int rotationDegrees = getWindowManager().getDefaultDisplay().getRotation();
+        Bitmap picForDisplay = null;
+        if(rotationDegrees==0){
+            picForDisplay = Bitmap.createScaledBitmap(pic, screenHW.get("width"), (int)(screenHW.get("width") * CAMERA_PREVIEW_HW_RATIO), true);
+        }else{
+            picForDisplay = Bitmap.createScaledBitmap(pic, (int)(screenHW.get("height")* CAMERA_PREVIEW_HW_RATIO), screenHW.get("height"), true);
+        }
 
-
-        Bitmap picForDisplay = Bitmap.createScaledBitmap(pic, screenHW.get("width"), (int)(screenHW.get("width") * CAMERA_PREVIEW_HW_RATIO), true);
         imageView.setImageBitmap(picForDisplay);
 
 
@@ -278,11 +308,8 @@ public class CameraActivity extends AppCompatActivity {
         Button cancelButton = findViewById(R.id.cancelButton);
 
         confirmButton.setOnClickListener(v -> {
+            showLoading();
             saveImage(bitmapToByteArray(pic));
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("photoPath", photoPath);
-            setResult(RESULT_OK, resultIntent);
-            finish();
         });
 
 
@@ -303,25 +330,56 @@ public class CameraActivity extends AppCompatActivity {
             backButton.setOnClickListener(v2 -> finish());
         });
     }
-
+    private void showLoading() {
+        loadingView.setVisibility(View.VISIBLE); // 显示加载动画
+    }
+    private void hideLoading() {
+        loadingView.setVisibility(View.GONE); // 隐藏加载动画
+    }
 
 
     private void saveImage(byte[] data) {
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        if (!storageDir.exists() && !storageDir.mkdirs()) {
-            return;
-        }
-        String inOutFlag = getIntent().getStringExtra("inOutFlag") + "_";
-        String fileName = inOutFlag + w_id + ".jpg";
-        File imageFile = new File(storageDir, fileName);
-        photoPath = imageFile.getAbsolutePath();
+        String imageType = getIntent().getStringExtra("imageType");
+        String imagePre = imageType + "_";
 
-        try (FileOutputStream fos = new FileOutputStream(imageFile)) {
-            fos.write(data);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        assert imageType != null;
+        if (imageType.equals("autoRecog")){
+            new Thread(() -> {
+                try {
+                    JSONObject jsonObject = autoRecog.getRecognitionResult(data);
+                    name = (String) jsonObject.get("name");
+                    wid = (String) jsonObject.get("workid");
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                runOnUiThread(() -> {
+                    Intent resultIntent = new Intent();
+                    name = Constants.aa.get(name);
+                    resultIntent.putExtra("autoRecogResName", name);
+                    resultIntent.putExtra("autoRecogResId", wid);
+                    setResult(2, resultIntent);
+                    finish();
+                });
+            }).start();
+        }else{
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            if (!storageDir.exists() && !storageDir.mkdirs()) {
+                return;
+            }
+            String fileName = imagePre + w_id + ".jpg";
+            File imageFile = new File(storageDir, fileName);
+            photoPath = imageFile.getAbsolutePath();
+            try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                fos.write(data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("photoPath", photoPath);
+            setResult(1, resultIntent);
+            finish();
+        }
     }
 
 
