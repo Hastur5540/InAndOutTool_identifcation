@@ -111,13 +111,19 @@ public class MainActivity extends AppCompatActivity {
 
             if (photoPath.isEmpty()) {
                 Toast.makeText(this, "请先拍摄照片", Toast.LENGTH_SHORT).show();
-            } else {
-                if (selectedPosition==0 && validateInputs()) {
-                    name = nameInput.getText().toString();
-                    workId = idInput.getText().toString();
-                }
+            } else if((selectedPosition==0 && validateInputs())){
 
+                name = nameInput.getText().toString();
+                workId = idInput.getText().toString();
                 // 检查工号是否已存在
+                if (isWorkerIdExists(workId)) {
+                    Toast.makeText(this, "工号 " + workId + " 已存在", Toast.LENGTH_SHORT).show();
+                } else {
+                    databaseHelper.addWorker(name, workId, photoPath, null);
+                    Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
+                    clearInputs();
+                }
+            }else if(selectedPosition==1){
                 if (isWorkerIdExists(workId)) {
                     Toast.makeText(this, "工号 " + workId + " 已存在", Toast.LENGTH_SHORT).show();
                 } else {

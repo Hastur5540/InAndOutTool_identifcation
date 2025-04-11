@@ -67,7 +67,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private float CAMERA_PREVIEW_HW_RATIO = (float)1.33;
     private float FRAME_CAMERAPREVIEW_RATIO = (float) 0.8;
-    private float CAPTURE_FRAME_HW_RATIO = (float) 1.4;
+    private float CAPTURE_FRAME_HW_RATIO = (float) 1.33;
     private float MAX_HEIGHT_RATIO = (float) 3.5/4;
     private AutoRecog autoRecog = new AutoRecog("/face_recog");
 
@@ -308,7 +308,6 @@ public class CameraActivity extends AppCompatActivity {
         Button cancelButton = findViewById(R.id.cancelButton);
 
         confirmButton.setOnClickListener(v -> {
-            showLoading();
             saveImage(bitmapToByteArray(pic));
         });
 
@@ -354,7 +353,7 @@ public class CameraActivity extends AppCompatActivity {
                 }
                 runOnUiThread(() -> {
                     Intent resultIntent = new Intent();
-                    name = Constants.aa.get(name);
+//                    name = Constants.aa.get(name);
                     resultIntent.putExtra("autoRecogResName", name);
                     resultIntent.putExtra("autoRecogResId", wid);
                     setResult(2, resultIntent);

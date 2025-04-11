@@ -1,5 +1,6 @@
 package com.example.inandouttool_identification.entity;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -61,8 +62,18 @@ public class WorkerAdapter extends BaseAdapter {
         workerId.setText(worker.getId());
         // 删除按钮点击事件
         deleteButton.setOnClickListener(v -> {
-            deleteWorker(worker, position);
+            new AlertDialog.Builder(context)
+                    .setTitle("删除确认")
+                    .setMessage("确定要删除该工人吗？")
+                    .setPositiveButton("确定", (dialog, which) -> {
+                        deleteWorker(worker, position); // 用户确认删除
+                    })
+                    .setNegativeButton("取消", (dialog, which) -> {
+                        dialog.dismiss(); // 取消操作
+                    })
+                    .show();
         });
+
 
         // **查看按钮点击事件**
         checkButton.setOnClickListener(v -> {

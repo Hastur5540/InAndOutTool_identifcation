@@ -117,6 +117,9 @@ public class ToolCheckActivity extends AppCompatActivity {
                 // 点击一致性文本查看不一致情况
                 tvToolConsistency.setOnClickListener(v -> showDiscrepancyDialog(enterToolsMap, exitToolsMap));
             }
+            workerImageView_IN.setOnClickListener(v -> ImageProcess.showImageDialog(this, workerImageView_IN.getDrawable()));
+            workerImageView_OUT.setOnClickListener(v -> ImageProcess.showImageDialog(this, workerImageView_OUT.getDrawable()));
+
         }
     }
 

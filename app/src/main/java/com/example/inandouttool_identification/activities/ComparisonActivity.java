@@ -1,16 +1,22 @@
 package com.example.inandouttool_identification.activities;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -76,6 +82,7 @@ public class ComparisonActivity extends AppCompatActivity {
             Bitmap adjustedBitmap = imageProcessor.adjustImageSize(bitmap, workerImageView_IN);
             workerImageView_IN.setImageBitmap(adjustedBitmap);
         });
+        workerImageView_IN.setOnClickListener(v -> ImageProcess.showImageDialog(this, workerImageView_IN.getDrawable()));
 
         // Capture button functionality
         captureButton.setOnClickListener(v -> {
@@ -187,6 +194,8 @@ public class ComparisonActivity extends AppCompatActivity {
             photoPath_OUT = data.getStringExtra("photoPath");
             Bitmap bitmap = BitmapFactory.decodeFile(photoPath_OUT);
             workerImageView_OUT.setImageBitmap(bitmap);
+            workerImageView_OUT.setOnClickListener(v -> ImageProcess.showImageDialog(this, workerImageView_OUT.getDrawable()));
+
             worker.setPhotoPath_OUT(photoPath_OUT);
             databaseHelper.updateWorker(worker.getId(), worker.getName(), worker.getPhotoPath_IN(), worker.getPhotoPath_OUT());
         }

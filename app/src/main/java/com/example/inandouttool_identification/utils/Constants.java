@@ -10,7 +10,7 @@ public final class Constants {
         throw new AssertionError("Cannot instantiate the Constants class");
     }
 
-    public static final String TARGET_IP_ADDRESS = "http://172.20.10.13";
+    public static final String TARGET_IP_ADDRESS = "http://192.168.100.108";
 
     public static final String PORT = "5000";
 
@@ -22,6 +22,7 @@ public final class Constants {
         aa.put("yjh", "于江浩");
         aa.put("wy", "王羽");
         aa.put("yyb", "叶亦滨");
+        aa.put("null", "王羽");
     }
 
 }

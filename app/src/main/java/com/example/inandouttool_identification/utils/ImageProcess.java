@@ -1,10 +1,18 @@
 package com.example.inandouttool_identification.utils;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Base64;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
+
+import com.example.inandouttool_identification.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,4 +64,25 @@ public class ImageProcess {
         return Bitmap.createScaledBitmap(originalBitmap, scaledWidth, scaledHeight, true);
     }
 
+    // 图片检查界面
+    public static void showImageDialog(Context viewContext, Drawable imageDrawable) {
+        if (imageDrawable == null) return; // 防止空图片
+
+        // 创建一个 Dialog
+        Dialog dialog = new Dialog(viewContext);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // 不显示标题栏
+        dialog.setContentView(R.layout.dialog_image_preview);
+
+        // 获取 Dialog 里的 ImageView
+        ImageView imageView = dialog.findViewById(R.id.dialogImageView);
+
+        imageView.setImageDrawable(imageDrawable); // 设置图片
+
+        // 点击图片关闭 Dialog
+        imageView.setOnClickListener(v -> dialog.dismiss());
+
+        // 显示 Dialog
+        dialog.show();
+
+    }
 }
