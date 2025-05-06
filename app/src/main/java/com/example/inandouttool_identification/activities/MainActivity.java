@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,12 @@ import com.example.inandouttool_identification.database.DatabaseHelper;
 import com.example.inandouttool_identification.utils.ImageProcess;
 import com.example.inandouttool_identification.utils.AutoRecog;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -95,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         listButton.setOnClickListener(v -> {
+            deleteTempFiles();
             Intent intent = new Intent(MainActivity.this, WorkerListActivity.class);
             startActivity(intent);
         });
@@ -117,9 +125,11 @@ public class MainActivity extends AppCompatActivity {
                 workId = idInput.getText().toString();
                 // 检查工号是否已存在
                 if (isWorkerIdExists(workId)) {
-                    Toast.makeText(this, "工号 " + workId + " 已存在", Toast.LENGTH_SHORT).show();
+                    saveImage();
+                    Toast.makeText(this, "工号 " + workId + " 已存在，添加图片", Toast.LENGTH_SHORT).show();
                 } else {
                     databaseHelper.addWorker(name, workId, photoPath, null);
+                    saveImage();
                     Toast.makeText(this, "工人信息已保存！", Toast.LENGTH_SHORT).show();
                     clearInputs();
                 }
@@ -162,6 +172,69 @@ public class MainActivity extends AppCompatActivity {
             exists=true;
         }
         return exists;
+    }
+
+    private void saveImage() {
+        // 获取设备ID
+        String id = idInput.getText().toString();
+        String deviceFolderName = "WorkerID_" + id; // 使用设备ID命名文件夹
+        File storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), deviceFolderName);
+
+        // 创建文件夹，如果不存在则创建
+        if (!storageDir.exists() && !storageDir.mkdirs()) {
+            return;
+        }
+
+        /*
+        发送图片到算法端
+         */
+
+        // 复制 Device_temp 下的所有文件到新创建的文件夹
+        File tempDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Device_temp");
+        if (tempDir.exists() && tempDir.isDirectory()) {
+            File[] tempFiles = tempDir.listFiles();
+            if (tempFiles != null) {
+                for (File tempFile : tempFiles) {
+                    // 复制文件到新目录
+                    File newFile = new File(storageDir, tempFile.getName());
+                    try {
+                        copyFile(tempFile, newFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // 调用方法删除 Device_temp 中的所有文件
+                deleteTempFiles();
+            }
+        }
+    }
+
+    private void deleteTempFiles() {
+        File tempDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Device_temp");
+        if (!tempDir.exists() && !tempDir.mkdirs()) {
+            return;
+        }
+        File[] tempFiles = tempDir.listFiles();
+        for (File tempFile : tempFiles) {
+            if (tempFile.delete()) {
+                // 成功删除文件
+                System.out.println("Deleted: " + tempFile.getName());
+            } else {
+                // 删除失败
+                System.out.println("Failed to delete: " + tempFile.getName());
+            }
+        }
+    }
+
+    private void copyFile(File sourceFile, File destFile) throws IOException {
+        try (InputStream in = new FileInputStream(sourceFile);
+             OutputStream out = new FileOutputStream(destFile)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+        }
     }
 
     @Override

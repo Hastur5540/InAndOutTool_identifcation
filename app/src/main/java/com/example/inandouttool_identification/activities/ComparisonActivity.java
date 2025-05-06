@@ -76,18 +76,22 @@ public class ComparisonActivity extends AppCompatActivity {
         });
         // 获取加载视图
         loadingView = findViewById(R.id.loadingView);
-        String photoPath_IN = worker.getPhotoPath_IN();
+        String photoPath_IN = loadFirstImages("in");
         Bitmap bitmap = BitmapFactory.decodeFile(photoPath_IN);
-        workerImageView_IN.post(() -> {
-            Bitmap adjustedBitmap = imageProcessor.adjustImageSize(bitmap, workerImageView_IN);
-            workerImageView_IN.setImageBitmap(adjustedBitmap);
+        workerImageView_IN.setImageBitmap(bitmap);
+
+        workerImageView_IN.setOnClickListener(v -> {
+            Intent intent = new Intent(ComparisonActivity.this, AlbumActivity.class);
+            intent.putExtra("DeviceId", worker.getId());
+            intent.putExtra("temp", "notTemp");
+            intent.putExtra("inOutFlag", "in");
+            startActivity(intent);
         });
-        workerImageView_IN.setOnClickListener(v -> ImageProcess.showImageDialog(this, workerImageView_IN.getDrawable()));
 
         // Capture button functionality
         captureButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ComparisonActivity.this, CameraActivity.class);
-            intent.putExtra("workerId", worker.getId());
+            Intent intent = new Intent(ComparisonActivity.this, Camera_OutActivity.class);
+            intent.putExtra("WorkerId", worker.getId());
             intent.putExtra("imageType", "out");
             startActivityForResult(intent, 1);
         });
@@ -104,7 +108,7 @@ public class ComparisonActivity extends AppCompatActivity {
 
                     HttpRequest httpRequest = new HttpRequest("/process_image");
                     String photoPathIn = worker.getPhotoPath_IN();
-                    String photoPathOut = worker.getPhotoPath_OUT();
+                    String photoPathOut = photoPath_OUT;
 
                     ArrayList<Map<String, Object>> result1 = null;
                     ArrayList<Map<String, Object>> result2 = null;
@@ -177,6 +181,24 @@ public class ComparisonActivity extends AppCompatActivity {
                 }).start();
             }
         });
+    }
+
+    private String loadFirstImages(String inOutFlag) {
+
+        String deviceFolderName = "WorkerID_" + worker.getId(); // 使用设备ID命名文件夹
+        File storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), deviceFolderName);
+        String fileName = worker.getId();
+        if (storageDir.exists()) {
+            File[] files = storageDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile() && file.getName().startsWith(fileName)) {
+                        return file.getAbsolutePath();
+                    }
+                }
+            }
+        }
+        return deviceFolderName;
     }
 
     private void showLoading() {

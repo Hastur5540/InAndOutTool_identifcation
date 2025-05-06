@@ -205,9 +205,9 @@ public class CameraActivity extends AppCompatActivity {
                 // 图片处理流程： 旋转，放缩，截取。
                 Bitmap bitmap = imageProxyToBitmap(image);
 
-                croppedImg = cropBitmapToFrame(bitmap, captureFrame);
+//                croppedImg = cropBitmapToFrame(bitmap, captureFrame);
 
-                runOnUiThread(() -> toCheckView(croppedImg));
+                runOnUiThread(() -> toCheckView(bitmap));
 
                 image.close();
 
@@ -219,8 +219,6 @@ public class CameraActivity extends AppCompatActivity {
                 exception.printStackTrace();
             }
         });
-
-
     }
 
 
@@ -339,8 +337,8 @@ public class CameraActivity extends AppCompatActivity {
 
     private void saveImage(byte[] data) {
         String imageType = getIntent().getStringExtra("imageType");
-        String imagePre = imageType + "_";
-
+        String deviceFolderName = "Device_temp";
+        File storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), deviceFolderName);
         assert imageType != null;
         if (imageType.equals("autoRecog")){
             new Thread(() -> {
@@ -361,11 +359,10 @@ public class CameraActivity extends AppCompatActivity {
                 });
             }).start();
         }else{
-            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
             if (!storageDir.exists() && !storageDir.mkdirs()) {
                 return;
             }
-            String fileName = imagePre + w_id + ".jpg";
+            String fileName = w_id + "_" + System.currentTimeMillis() + ".jpg";
             File imageFile = new File(storageDir, fileName);
             photoPath = imageFile.getAbsolutePath();
             try (FileOutputStream fos = new FileOutputStream(imageFile)) {
