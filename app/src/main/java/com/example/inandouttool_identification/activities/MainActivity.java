@@ -189,8 +189,14 @@ public class MainActivity extends AppCompatActivity {
         发送图片到算法端
          */
 
+        /*
+        把算法端传回的图片存入“deviceFolderName”目录
+         */
+
+
         // 复制 Device_temp 下的所有文件到新创建的文件夹
         File tempDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Device_temp");
+
         if (tempDir.exists() && tempDir.isDirectory()) {
             File[] tempFiles = tempDir.listFiles();
             if (tempFiles != null) {

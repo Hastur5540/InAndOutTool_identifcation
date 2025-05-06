@@ -121,42 +121,6 @@ public class Camera_OutActivity extends AppCompatActivity {
         }
 
         startCamera();
-
-        overlayImageView.setOnClickListener(v -> {
-            if (overlayImageView.getVisibility() == View.VISIBLE) {
-                overlayImageView.setVisibility(View.GONE); // 点击后隐藏
-            }
-        });
-
-        captureButton.setOnClickListener(v -> capturePhoto());
-
-        backButton.setOnClickListener(v -> {
-
-            finish(); // 结束当前活动
-        });
-
-        // Check "inOutFlag" and show button/seekBar for "out"
-
-        selectPhotoButton.setVisibility(View.VISIBLE);
-        seekBar.setVisibility(View.VISIBLE);
-
-        // Select photo button click listener
-        selectPhotoButton.setOnClickListener(v -> choosePhoto());
-
-        // SeekBar listener to adjust transparency
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float alpha = progress / 100f; // Convert to a fraction
-                overlayImageView.setAlpha(alpha); // Set transparency
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
     }
 
     private void choosePhoto() {
@@ -265,6 +229,41 @@ public class Camera_OutActivity extends AppCompatActivity {
 
                 processCameraProvider.unbindAll();
                 processCameraProvider.bindToLifecycle(this, cameraSelector, preview, capturedImg);
+                overlayImageView.setOnClickListener(v -> {
+                    if (overlayImageView.getVisibility() == View.VISIBLE) {
+                        overlayImageView.setVisibility(View.GONE); // 点击后隐藏
+                    }
+                });
+
+                captureButton.setOnClickListener(v -> capturePhoto());
+
+                backButton.setOnClickListener(v -> {
+
+                    finish(); // 结束当前活动
+                });
+
+                // Check "inOutFlag" and show button/seekBar for "out"
+
+                selectPhotoButton.setVisibility(View.VISIBLE);
+                seekBar.setVisibility(View.VISIBLE);
+
+                // Select photo button click listener
+                selectPhotoButton.setOnClickListener(v -> choosePhoto());
+
+                // SeekBar listener to adjust transparency
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        float alpha = progress / 100f; // Convert to a fraction
+                        overlayImageView.setAlpha(alpha); // Set transparency
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {}
+                });
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -321,14 +320,15 @@ public class Camera_OutActivity extends AppCompatActivity {
 
 
         cancelButton.setOnClickListener(v -> {
-            setContentView(R.layout.activity_camera);
+            setContentView(R.layout.activity_camera_out);
 
             // 重新获取视图对象
             cameraPreview = findViewById(R.id.cameraPreview);
-            captureFrame = findViewById(R.id.captureFrame);
             captureButton = findViewById(R.id.captureButton_1);
             backButton = findViewById(R.id.backButton);
-
+            overlayImageView = findViewById(R.id.overlayImageView);
+            selectPhotoButton = findViewById(R.id.selectPhotoButton);
+            seekBar = findViewById(R.id.seekBar);
             // 重新启动相机
             startCamera();
 

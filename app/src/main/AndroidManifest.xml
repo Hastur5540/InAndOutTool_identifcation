@@ -39,6 +39,7 @@
         <activity android:name=".activities.Camera_OutActivity" />
         <activity android:name=".activities.Camera_AlbumActivity" />
         <activity android:name=".activities.AlbumActivity" />
+        <activity android:name=".activities.WorkerListActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.inandouttool_identification.fileprovider"
